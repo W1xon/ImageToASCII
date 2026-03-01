@@ -3,31 +3,35 @@ using SkiaSharp;
 
 namespace ImageToASCII.Core.Processors;
 
-public class ImageProcessorBase
+public abstract class ImageProcessorBase
 {
-    protected BitmapToAsciiConverter _asciiConverter;
-    private const double WidthOffset = 1.8;
+    protected readonly BitmapToAsciiConverter _asciiConverter;
     public int AsciiWidth { get; set; } = 350;
 
-    public ImageProcessorBase(BitmapToAsciiConverter converter)
+    protected ImageProcessorBase(BitmapToAsciiConverter converter)
     {
         _asciiConverter = converter;
     }
 
-    protected SKBitmap ResizeBitmap(SKBitmap bitmap, bool applyWidthOffset)
+    protected SKBitmap ResizeBitmap(SKBitmap bitmap, float fontAspectRatio)
     {
-        double ratio = bitmap.Width / (double)bitmap.Height;
+        if (bitmap.Width == 0 || bitmap.Height == 0)
+            throw new ArgumentException("Битмап имеет нулевой размер.");
+
+        double imageRatio = bitmap.Width / (double)bitmap.Height;
+
         int targetWidth = AsciiWidth;
-        int targetHeight = applyWidthOffset 
-            ? (int)(targetWidth / (ratio * WidthOffset)) 
-            : (int)(targetWidth / ratio);
+        
+        int targetHeight = (int)((targetWidth / imageRatio) * fontAspectRatio);
+
+        if (targetHeight <= 0) targetHeight = 1;
 
         var resized = new SKBitmap(targetWidth, targetHeight);
         
         using (var canvas = new SKCanvas(resized))
         using (var paint = new SKPaint())
         {
-            paint.FilterQuality = SKFilterQuality.Medium;
+            paint.FilterQuality = SKFilterQuality.High;
             paint.IsAntialias = true;
             
             canvas.Clear(SKColors.Transparent);

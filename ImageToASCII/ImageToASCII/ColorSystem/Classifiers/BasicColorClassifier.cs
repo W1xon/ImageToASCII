@@ -1,50 +1,76 @@
-﻿
-using SkiaSharp;
+﻿using SkiaSharp;
 
-namespace ImageToASCII.ColorSystem
+namespace ImageToASCII.ColorSystem;
+
+public sealed class BasicColorClassifier : IColorClassifier
 {
-    public class BasicColorClassifier : IColorClassifier
+    private const byte HighThreshold = 200;
+    private const byte MidThreshold  = 150;
+    private const byte LowThreshold  = 50;
+    private const byte GrayThreshold = 100;
+
+    public uint GetColor(byte red, byte green, byte blue)
     {
-        private const byte _highThreshold = 200;
-        private const byte _midThreshold  = 150;
-        private const byte _lowThreshold  = 50;
-        private const byte _grayThreshold = 100;
+        // Белый / Чёрный
+        if (IsAbove(red, green, blue, HighThreshold))
+            return Pack(SKColors.White);
 
-        public uint GetColor(byte red, byte green, byte blue)
-        {
-            
-            if (red > _highThreshold && green > _highThreshold && blue > _highThreshold)
-                return ColorUtils.Pack(SKColors.White);
-            if (red < _lowThreshold && green < _lowThreshold && blue < _lowThreshold)
-                return ColorUtils.Pack(SKColors.Black);
-            if (red > _highThreshold && green < _lowThreshold && blue < _lowThreshold)
-                return ColorUtils.Pack(SKColors.Red);
-            if (red < _lowThreshold && green > _highThreshold && blue < _lowThreshold)
-                return ColorUtils.Pack(SKColors.Green);
-            if (red < _lowThreshold && green < _lowThreshold && blue > _highThreshold)
-                return ColorUtils.Pack(SKColors.Blue);
-            if (red > _highThreshold && green > _highThreshold && blue < _lowThreshold)
-                return ColorUtils.Pack(SKColors.Yellow);
-            if (red > _highThreshold && green < _lowThreshold && blue > _highThreshold)
-                return ColorUtils.Pack(SKColors.Magenta);
-            if (red < _lowThreshold && green > _highThreshold && blue > _highThreshold)
-                return ColorUtils.Pack(SKColors.Cyan);
-            if (red > _midThreshold && green > _midThreshold && blue > _midThreshold)
-                return ColorUtils.Pack(SKColors.LightGray);
-            if (red > _grayThreshold && green > _grayThreshold && blue > _grayThreshold)
-                return ColorUtils.Pack(SKColors.Gray);
-            if (red > green && red > blue)
-                return ColorUtils.Pack(SKColors.DarkRed);
-            if (green > red && green > blue)
-                return ColorUtils.Pack(SKColors.DarkGreen);
-            if (blue > red && blue > green)
-                return ColorUtils.Pack(SKColors.DarkBlue);
-            if (red > green && red > blue && green > blue)
-                return ColorUtils.Pack(SKColors.Goldenrod);
-            if (red > green && red > blue && blue > green)
-                return ColorUtils.Pack(SKColors.DeepPink);
+        if (IsBelow(red, green, blue, LowThreshold))
+            return Pack(SKColors.Black);
 
-            return ColorUtils.Pack(SKColors.Gray);
-        }
+        // Чистые цвета
+        if (red   > HighThreshold && green < LowThreshold  && blue  < LowThreshold)
+            return Pack(SKColors.Red);
+
+        if (green > HighThreshold && red   < LowThreshold  && blue  < LowThreshold)
+            return Pack(SKColors.Green);
+
+        if (blue  > HighThreshold && red   < LowThreshold  && green < LowThreshold)
+            return Pack(SKColors.Blue);
+
+        // Вторичные цвета
+        if (red > HighThreshold && green > HighThreshold && blue < LowThreshold)
+            return Pack(SKColors.Yellow);
+
+        if (red > HighThreshold && blue  > HighThreshold && green < LowThreshold)
+            return Pack(SKColors.Magenta);
+
+        if (green > HighThreshold && blue > HighThreshold && red < LowThreshold)
+            return Pack(SKColors.Cyan);
+
+        // Оттенки серого
+        if (IsAbove(red, green, blue, MidThreshold))
+            return Pack(SKColors.LightGray);
+
+        if (IsAbove(red, green, blue, GrayThreshold))
+            return Pack(SKColors.Gray);
+
+        // Доминирующий канал
+        if (red > green && red > blue)
+            return Pack(SKColors.DarkRed);
+
+        if (green > red && green > blue)
+            return Pack(SKColors.DarkGreen);
+
+        if (blue > red && blue > green)
+            return Pack(SKColors.DarkBlue);
+
+        // Тёплые оттенки
+        if (red > green && red > blue && green > blue)
+            return Pack(SKColors.Goldenrod);
+
+        if (red > green && red > blue && blue > green)
+            return Pack(SKColors.DeepPink);
+
+        return Pack(SKColors.Gray);
     }
+
+    private static bool IsAbove(byte r, byte g, byte b, byte threshold)
+        => r > threshold && g > threshold && b > threshold;
+
+    private static bool IsBelow(byte r, byte g, byte b, byte threshold)
+        => r < threshold && g < threshold && b < threshold;
+
+    private static uint Pack(SKColor color)
+        => ColorUtils.Pack(color);
 }

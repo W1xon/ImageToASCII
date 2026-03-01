@@ -6,50 +6,51 @@ namespace ImageToASCII.Application;
 public abstract class BaseHandler
 {
     protected ConversionSettings Settings { get; private set; }
-    
+
     public async Task ProcessAsync()
     {
-        Console.Clear();
-        ConsoleUI.DrawBanner();
-        
-        Settings = new ConversionSettings();
-        if (!SelectFile())
+        Initialize();
+
+        if (!TrySelectInputFile() || !CollectSettings())
         {
             ConsoleUI.WaitForKey();
             return;
         }
-        
-        if (!CollectSettings())
-        {
-            ConsoleUI.WaitForKey();
-            return;
-        }
-        
+
         try
         {
             await ExecuteConversionAsync();
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            ConsoleUI.ShowException(ex);
+            ConsoleUI.ShowException(exception);
         }
-        
+
         ConsoleUI.WaitForKey();
     }
-    
+
     protected abstract string GetFileFilter();
     protected abstract string GetFileDialogTitle();
     protected abstract bool CollectSettings();
     protected abstract Task ExecuteConversionAsync();
-    
-    private bool SelectFile()
+
+    private void Initialize()
     {
-        var selectedFile = ConsoleUI.AskForFile(GetFileFilter(), GetFileDialogTitle());
-        
-        if (selectedFile == null)
+        Console.Clear();
+        ConsoleUI.DrawBanner();
+        Settings = new ConversionSettings();
+    }
+
+    private bool TrySelectInputFile()
+    {
+        var inputFilePath = ConsoleUI.AskForFile(
+            GetFileFilter(),
+            GetFileDialogTitle());
+
+        if (string.IsNullOrWhiteSpace(inputFilePath))
             return false;
-        
-        Settings.InputFilePath = selectedFile;
+
+        Settings.InputFilePath = inputFilePath;
         return true;
     }
 }

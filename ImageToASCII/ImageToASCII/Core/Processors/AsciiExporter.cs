@@ -1,4 +1,5 @@
-﻿using SkiaSharp;
+﻿using System.Runtime.InteropServices;
+using SkiaSharp;
 using ImageToASCII.ColorSystem;
 using ImageToASCII.Core.Converters;
 using ImageToASCII.Services;
@@ -8,13 +9,41 @@ namespace ImageToASCII.Core.Processors;
 
 public class AsciiExporter : ImageProcessorBase, IDisposable
 {
-    private SKPaint _textPaint;
-    private SKTypeface _typeface;
-    private static readonly string[] _oneCharCache = new string[256];
+    private SKPaint? _textPaint;
+    private readonly SKTypeface _typeface;
+    private readonly Dictionary<char, string> _stringCache = new();
+    private float _lastFontSize = -1;
+    private float _charWidth;
 
     public AsciiExporter(BitmapToAsciiConverter converter) : base(converter)
     {
-        _typeface = SKTypeface.FromFamilyName("Arial", SKFontStyleWeight.Normal, SKFontStyleWidth.Normal, SKFontStyleSlant.Upright);
+        _typeface = LoadBestMonospaceTypeface();
+        
+        for (int i = 0; i < 256; i++)
+            _stringCache[(char)i] = ((char)i).ToString();
+    }
+
+    private static SKTypeface LoadBestMonospaceTypeface()
+    {
+        string[] candidates = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? new[] { "Consolas", "Courier New", "Lucida Console", "monospace" }
+            : new[] { "DejaVu Sans Mono", "Liberation Mono", "FreeMono", "Courier New", "monospace" };
+
+        foreach (var name in candidates)
+        {
+            var tf = SKTypeface.FromFamilyName(name, SKFontStyleWeight.Normal,
+                SKFontStyleWidth.Normal, SKFontStyleSlant.Upright);
+
+            if (tf != null && tf.FamilyName != "Arial" && tf.FamilyName != "sans-serif"
+                && tf.FamilyName != "serif")
+            {
+                ConsoleUI.ShowInfo($"Используется шрифт: {tf.FamilyName}");
+                return tf;
+            }
+            tf?.Dispose();
+        }
+
+        return SKTypeface.Default;
     }
 
     public SKBitmap GetProcessing(SKBitmap bmp, IColorClassifier classifier, int fontSize = 16)
@@ -30,43 +59,34 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
         return RenderCoreWithProgress(data, fontSize);
     }
 
-    public void Dispose()
-    {
-        _textPaint?.Dispose();
-        _typeface?.Dispose();
-    }
-
     private SKBitmap RenderCoreOptimized(AsciiPrepareResult data, int fontSize)
     {
+        var paint = GetOrCreatePaint(fontSize);
         var output = new SKBitmap(data.OutputWidth, data.OutputHeight);
         using var canvas = new SKCanvas(output);
         canvas.Clear(SKColors.Black);
 
-        var paint = GetOrCreatePaint(fontSize);
-        int w = data.AsciiChars.GetLength(1);
-        int h = data.AsciiChars.GetLength(0);
-        int totalChars = w * h;
-
-        if (data.Colors == null || data.Colors.Length < totalChars)
-            throw new InvalidOperationException($"Colors массив слишком мал: {data.Colors?.Length ?? 0} < {totalChars}");
-
+        var chars = data.AsciiChars;
         var colors = data.Colors;
+        int h = chars.GetLength(0);
+        int w = chars.GetLength(1);
         int colorIndex = 0;
+
+        paint.GetFontMetrics(out var metrics);
+        float verticalOffset = -metrics.Ascent; 
 
         for (int y = 0; y < h; y++)
         {
+            float yPos = y * fontSize + verticalOffset;
+
             for (int x = 0; x < w; x++)
             {
-                char c = data.AsciiChars[y, x];
-                uint packed = colors[colorIndex];
-
-                byte a = (byte)(packed >> 24);
-                byte r = (byte)(packed >> 16);
-                byte g = (byte)(packed >> 8);
-                byte b = (byte)packed;
-
-                paint.Color = new SKColor(r, g, b, a);
-                canvas.DrawText(GetOneCharString(c), x * fontSize, (y + 1) * fontSize - 2, paint);
+                char c = chars[y, x];
+                if (c != ' ')
+                {
+                    paint.Color = new SKColor(colors[colorIndex]);
+                    canvas.DrawText(GetCachedString(c), x * _charWidth, yPos, paint);
+                }
                 colorIndex++;
             }
         }
@@ -76,52 +96,51 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
 
     private SKBitmap RenderCoreWithProgress(AsciiPrepareResult data, int fontSize)
     {
+        var paint = GetOrCreatePaint(fontSize);
         var output = new SKBitmap(data.OutputWidth, data.OutputHeight);
         using var canvas = new SKCanvas(output);
         canvas.Clear(SKColors.Black);
 
-        var paint = GetOrCreatePaint(fontSize);
-        int w = data.AsciiChars.GetLength(1);
-        int h = data.AsciiChars.GetLength(0);
-        int total = w * h;
-        int progressStep = Math.Max(1, total / 10);
-
-        if (data.Colors == null || data.Colors.Length < total)
-            throw new InvalidOperationException($"Colors массив слишком мал: {data.Colors?.Length ?? 0} < {total}");
-
+        var chars = data.AsciiChars;
         var colors = data.Colors;
+        int h = chars.GetLength(0);
+        int w = chars.GetLength(1);
+        int total = w * h;
+        int progressStep = Math.Max(1, total / 20);
         int colorIndex = 0;
         int lastProgress = 0;
 
+        paint.GetFontMetrics(out var metrics);
+        float verticalOffset = -metrics.Ascent;
+
         for (int y = 0; y < h; y++)
         {
+            float yPos = y * fontSize + verticalOffset;
+
             for (int x = 0; x < w; x++)
             {
-                char c = data.AsciiChars[y, x];
-                uint packed = colors[colorIndex];
-
-                byte a = (byte)(packed >> 24);
-                byte r = (byte)(packed >> 16);
-                byte g = (byte)(packed >> 8);
-                byte b = (byte)packed;
-
-                paint.Color = new SKColor(r, g, b, a);
-                canvas.DrawText(GetOneCharString(c), x * fontSize, (y + 1) * fontSize - 2, paint);
+                char c = chars[y, x];
+                if (c != ' ')
+                {
+                    paint.Color = new SKColor(colors[colorIndex]);
+                    canvas.DrawText(GetCachedString(c), x * _charWidth, yPos, paint);
+                }
 
                 colorIndex++;
+
                 if (colorIndex % progressStep == 0)
                 {
-                    int progress = colorIndex * 100 / total;
+                    int progress = (int)((long)colorIndex * 100 / total);
                     if (progress > lastProgress)
                     {
                         lastProgress = progress;
-                        Console.Write($"\r  Прогресс: {progress}%   ");
+                        Console.Write($"\r  Прогресс рендеринга: {progress}%   ");
                     }
                 }
             }
         }
 
-        Console.WriteLine("\r  Прогресс: 100%   ");
+        Console.WriteLine("\r  Прогресс рендеринга: 100%   ");
         ConsoleUI.WriteSuccess("Рендеринг завершён!");
         return output;
     }
@@ -133,17 +152,35 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
             _textPaint = new SKPaint
             {
                 Typeface = _typeface,
-                TextSize = fontSize,
                 IsAntialias = false,
-                SubpixelText = false,
-                FilterQuality = SKFilterQuality.None
+                FilterQuality = SKFilterQuality.None,
+                TextAlign = SKTextAlign.Left
             };
         }
+
+        if (Math.Abs(_lastFontSize - fontSize) > 0.01f)
+        {
+            _textPaint.TextSize = fontSize;
+            _lastFontSize = fontSize;
+            _charWidth = _textPaint.MeasureText("W");
+        }
+
         return _textPaint;
+    }
+
+    private string GetCachedString(char c)
+    {
+        if (_stringCache.TryGetValue(c, out var s)) return s;
+        
+        s = c.ToString();
+        _stringCache[c] = s;
+        return s;
     }
 
     private AsciiPrepareResult PrepareInternal(SKBitmap bitmap, IColorClassifier colorClassifier, int fontSize, bool verbose)
     {
+        var paint = GetOrCreatePaint(fontSize);
+
         if (verbose)
         {
             Console.WriteLine();
@@ -151,25 +188,26 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
             ConsoleUI.WriteInfo($"Оригинал: {bitmap.Width}x{bitmap.Height}px");
         }
 
-        var resized = ResizeBitmap(bitmap, false);
+        float fontAspectRatio = _charWidth / (float)fontSize;
 
-        if (verbose)
-            ConsoleUI.WriteInfo($"После ресайза: {resized.Width}x{resized.Height}px");
-
+        var resized = ResizeBitmap(bitmap, fontAspectRatio);
+        
         var asciiChars = _asciiConverter.Convert(resized);
+        int h = asciiChars.GetLength(0);
+        int w = asciiChars.GetLength(1);
 
         if (verbose)
-            ConsoleUI.WriteInfo($"ASCII сетка: {asciiChars.GetLength(1)}x{asciiChars.GetLength(0)} символов");
+            ConsoleUI.WriteInfo($"Размер сетки: {w}x{h} символов");
 
         resized.ToGrayscale(colorClassifier);
 
-        int outW = asciiChars.GetLength(1) * fontSize;
-        int outH = asciiChars.GetLength(0) * fontSize;
+        int outW = (int)(w * _charWidth);
+        int outH = h * fontSize;
 
         if (verbose)
         {
-            ConsoleUI.WriteInfo($"Шрифт: {fontSize}px");
-            ConsoleUI.WriteInfo($"Финальный размер: {outW}x{outH}px");
+            ConsoleUI.WriteInfo($"Ширина символа: {_charWidth:F2}px, Высота: {fontSize}px");
+            ConsoleUI.WriteInfo($"Финальный холст: {outW}x{outH}px");
             Console.WriteLine();
         }
 
@@ -179,16 +217,13 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
             AsciiChars = asciiChars,
             OutputWidth = outW,
             OutputHeight = outH,
-            Colors = BitmapExtensions.Colors
+            Colors = BitmapExtensions.Colors 
         };
     }
 
-    private static string GetOneCharString(char c)
+    public void Dispose()
     {
-        int idx = (c < 256) ? (byte)c : (byte)'?';
-        var s = _oneCharCache[idx];
-        if (s == null)
-            _oneCharCache[idx] = s = new string(c, 1);
-        return s;
+        _textPaint?.Dispose();
+        _typeface?.Dispose();
     }
 }

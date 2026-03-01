@@ -2,8 +2,6 @@
 
 public class NaturalPaletteClassifier : IColorClassifier
 {
-    public uint GetColor(byte r, byte g, byte b)
-    {
-        return ColorUtils.Pack(r, g, b, 255);
-    }
+    public uint GetColor(byte red, byte green, byte blue)
+        => ColorUtils.Pack(red, green, blue, 255);
 }

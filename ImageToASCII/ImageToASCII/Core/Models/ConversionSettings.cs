@@ -1,16 +1,17 @@
-﻿namespace ImageToASCII.Core.Models;
+﻿using ImageToASCII.ColorSystem;
 
+namespace ImageToASCII.Core.Models;
 public class ConversionSettings
 {
-    public string InputFilePath { get; set; }
-    public int PaletteType { get; set; }
-    public int Width { get; set; }
-    public char[] AsciiPalette { get; set; }
-    public string OutputDirectory { get; set; }
-    
+    public string InputFilePath { get; set; } = "";
+    public PaletteType PaletteType { get; set; } = PaletteType.Basic;
+    public int Width { get; set; } = 80;
+    public AsciiPalette AsciiPalette { get; set; } = AsciiPaletteRegistry.Basic; 
+    public string OutputDirectory { get; set; } =
+        Path.Combine(AppContext.BaseDirectory, "Output");
+
     public ConversionSettings()
     {
-        OutputDirectory = Path.Combine(AppContext.BaseDirectory, "Output");
         Directory.CreateDirectory(OutputDirectory);
     }
 }

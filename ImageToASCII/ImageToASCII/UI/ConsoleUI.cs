@@ -1,4 +1,5 @@
-﻿using ImageToASCII.Core.Models;
+﻿using ImageToASCII.ColorSystem;
+using ImageToASCII.Core.Models;
 using ImageToASCII.Services;
 
 namespace ImageToASCII.UI;
@@ -11,14 +12,14 @@ public static class ConsoleUI
         Console.WriteLine(@"
   ╔═══════════════════════════════════════════════════════╗
   ║                                                       ║
-  ║        ██╗███╗   ███╗ █████╗  ██████╗ ███████╗        ║
+  ║        ██╗███╗    ███╗ █████╗  ██████╗ ███████╗       ║
   ║        ██║████╗ ████║██╔══██╗██╔════╝ ██╔════╝        ║
   ║        ██║██╔████╔██║███████║██║  ███╗█████╗          ║
   ║        ██║██║╚██╔╝██║██╔══██║██║   ██║██╔══╝          ║
   ║        ██║██║ ╚═╝ ██║██║  ██║╚██████╔╝███████╗        ║
   ║        ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝        ║
   ║                                                       ║
-  ║         [>] ASCII Converter v2.0.0 [<]                ║
+  ║          [>] ASCII Converter v2.1.0 [<]               ║
   ║                                                       ║
   ╚═══════════════════════════════════════════════════════╝
 ");
@@ -34,16 +35,16 @@ public static class ConsoleUI
         Console.WriteLine("  [3] Конвертация видео → ASCII MP4");
         Console.WriteLine("  [0] Выход");
         Console.WriteLine();
-    
+
         return ReadChoice(0, 3, "Выберите пункт");
     }
 
-    public static int AskPalette()
+    public static PaletteType AskPalette()
     {
         Console.WriteLine();
         WriteHeader("--- Выбор цветовой палитры");
         Console.WriteLine();
-        
+
         var options = new[]
         {
             ("Basic", "Простые цвета"),
@@ -51,7 +52,7 @@ public static class ConsoleUI
             ("Palette7", "7-цветная палитра"),
             ("Natural", "Естественные цвета")
         };
-        
+
         for (int i = 0; i < options.Length; i++)
         {
             Console.Write("  ");
@@ -63,61 +64,41 @@ public static class ConsoleUI
             Console.WriteLine($"({options[i].Item2})");
             Console.ResetColor();
         }
-        
-        return ReadChoice(1, 4);
+
+        return (PaletteType)ReadChoice(1, options.Length);
     }
 
-    public static char[] AskAsciiPalette()
+    public static AsciiPalette AskAsciiPalette()
     {
         Console.WriteLine();
         WriteHeader("--- Выбор ASCII градиента");
         Console.WriteLine();
-        
-        var palettes = ASCIIPalette.GetAllWithDescriptions();
-        int halfCount = (palettes.Count + 1) / 2;
-        
-        for (int i = 0; i < halfCount; i++)
+
+        var palettes = AsciiPaletteRegistry.All;
+
+        for (int i = 0; i < palettes.Count; i++)
         {
-            var left = palettes[i];
+            var p = palettes[i];
+            
             Console.Write("  ");
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.Write($"[{i + 1,2}]");
             Console.ResetColor();
-            Console.Write($" {left.Name,-11} ");
-            
+
+            Console.Write($" {p.Name,-11} ");
+
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write($"[{string.Join("", left.Palette.Take(8))}]");
+            string gradient = string.Join("", p.Characters);
+            Console.Write($"[{gradient}]");
             Console.ResetColor();
-            
+
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write($" {left.Description,-13}");
+            Console.WriteLine($" — {p.Description}");
             Console.ResetColor();
-            
-            int rightIndex = i + halfCount;
-            if (rightIndex < palettes.Count)
-            {
-                var right = palettes[rightIndex];
-                Console.Write("    ");
-                
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write($"[{rightIndex + 1,2}]");
-                Console.ResetColor();
-                Console.Write($" {right.Name,-11} ");
-                
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write($"[{string.Join("", right.Palette.Take(8))}]");
-                Console.ResetColor();
-                
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write($" {right.Description}");
-                Console.ResetColor();
-            }
-            
-            Console.WriteLine();
         }
-        
+
         int choice = ReadChoice(1, palettes.Count);
-        return palettes[choice - 1].Palette;
+        return palettes[choice - 1];
     }
 
     public static int AskWidth()
@@ -129,17 +110,17 @@ public static class ConsoleUI
         Console.WriteLine("  Рекомендуется: 100-200 для деталей, 50-80 для компактности, max: 1000");
         Console.ResetColor();
         Console.WriteLine();
-        
+
         while (true)
         {
             Console.Write("  Ширина символов: ");
             Console.ForegroundColor = ConsoleColor.Cyan;
             string input = Console.ReadLine() ?? "";
             Console.ResetColor();
-            
+
             if (int.TryParse(input, out int width) && width > 0 && width <= 1000)
                 return width;
-            
+
             WriteError("  Введите число от 1 до 1000");
         }
     }
@@ -148,9 +129,9 @@ public static class ConsoleUI
     {
         Console.WriteLine();
         WriteInfo($"Открытие диалога выбора файла...");
-        
+
         var selectedFile = DialogHelper.ShowOpenFileDialog(filter, title);
-        
+
         if (selectedFile != null)
         {
             WriteSuccess($"Выбран: {Path.GetFileName(selectedFile)}");
@@ -159,7 +140,7 @@ public static class ConsoleUI
         {
             WriteError("Файл не выбран");
         }
-        
+
         return selectedFile;
     }
 
@@ -194,39 +175,25 @@ public static class ConsoleUI
             Console.ForegroundColor = ConsoleColor.Cyan;
             string input = Console.ReadLine() ?? "";
             Console.ResetColor();
-            
+
             if (int.TryParse(input, out int val) && val >= min && val <= max)
                 return val;
-            
+
             WriteError($"  Введите число от {min} до {max}");
         }
     }
 
-    public static void WriteHeader(string text)
+    public static void WriteHeader(string text) => WriteColored(text, ConsoleColor.Cyan);
+    public static void WriteInfo(string text) => WriteColored($"  {text}", ConsoleColor.White);
+    public static void WriteSuccess(string text) => WriteColored($"  [OK] {text}", ConsoleColor.Green);
+    public static void WriteError(string text) => WriteColored($"  [!] {text}", ConsoleColor.Red);
+    public static void WriteWarning(string text) => WriteColored($"  [!] {text}", ConsoleColor.Yellow);
+    public static void ShowInfo(string text) => WriteColored($"  [i] {text}", ConsoleColor.Cyan);
+
+    private static void WriteColored(string text, ConsoleColor color)
     {
-        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.ForegroundColor = color;
         Console.WriteLine(text);
-        Console.ResetColor();
-    }
-
-    public static void WriteInfo(string text)
-    {
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine($"  {text}");
-        Console.ResetColor();
-    }
-
-    public static void WriteSuccess(string text)
-    {
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine($"  [OK] {text}");
-        Console.ResetColor();
-    }
-
-    public static void WriteError(string text)
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.WriteLine($"  [!] {text}");
         Console.ResetColor();
     }
 
@@ -247,18 +214,5 @@ public static class ConsoleUI
         Console.Write("  Нажмите любую клавишу для продолжения...");
         Console.ResetColor();
         Console.ReadKey(true);
-    }
-    
-    public static void WriteWarning(string message)
-    {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($"  [!] {message}");
-        Console.ResetColor();
-    }
-    public static void ShowInfo(string message)
-    {
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine($"  [i] {message}");
-        Console.ResetColor();
     }
 }

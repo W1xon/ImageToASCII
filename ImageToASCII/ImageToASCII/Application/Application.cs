@@ -2,45 +2,39 @@
 
 namespace ImageToASCII.Application;
 
-public class Application
+public sealed class Application
 {
-    private readonly ImageToAsciiHandler _imageHandler;
-    private readonly ImageToTextHandler _textHandler;
-    private readonly VideoToAsciiHandler _videoHandler;
-    
+    private readonly Dictionary<int, BaseHandler> _handlers;
+
     public Application()
     {
-        _imageHandler = new ImageToAsciiHandler();
-        _textHandler = new ImageToTextHandler();
-        _videoHandler = new VideoToAsciiHandler();
+        _handlers = new Dictionary<int, BaseHandler>
+        {
+            [1] = new ImageToAsciiHandler(),
+            [2] = new ImageToTextHandler(),
+            [3] = new VideoToAsciiHandler()
+        };
     }
-    
+
     public async Task RunAsync()
     {
         while (true)
         {
-            int choice = ConsoleUI.ShowMainMenu();
-            
-            if (choice == 0) break;
-            
+            var choice = ConsoleUI.ShowMainMenu();
+
+            if (choice == 0)
+                break;
+
+            if (!_handlers.TryGetValue(choice, out var handler))
+                continue;
+
             try
             {
-                switch (choice)
-                {
-                    case 1:
-                        await _imageHandler.ProcessAsync();
-                        break;
-                    case 2:
-                        await _textHandler.ProcessAsync();
-                        break;
-                    case 3:
-                        await _videoHandler.ProcessAsync();
-                        break;
-                }
+                await handler.ProcessAsync();
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                ConsoleUI.ShowException(ex);
+                ConsoleUI.ShowException(exception);
                 ConsoleUI.WaitForKey();
             }
         }

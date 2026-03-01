@@ -1,53 +1,40 @@
 ﻿using ImageToASCII.ColorSystem;
-using ImageToASCII.Core.Converters;
 using ImageToASCII.Core.Processors;
 using ImageToASCII.Services;
 using ImageToASCII.UI;
 
 namespace ImageToASCII.Application;
 
-public class VideoToAsciiHandler : BaseHandler
+public sealed class VideoToAsciiHandler : AsciiHandlerBase
 {
-    private BitmapToAsciiConverter _converter;
-    private AsciiExporter _exporter;
-    
-    protected override string GetFileFilter()
-    {
-        return "Видео|*.mp4;*.avi;*.mov;*.mkv|Все файлы|*.*";
-    }
-    
-    protected override string GetFileDialogTitle()
-    {
-        return "Выберите видео";
-    }
-    
-    protected override bool CollectSettings()
-    {
-        Settings.AsciiPalette = ConsoleUI.AskAsciiPalette();
-        Settings.Width = ConsoleUI.AskWidth();
-        Settings.PaletteType = ConsoleUI.AskPalette();
-        
-        _converter = new BitmapToAsciiConverter(Settings.AsciiPalette);
-        _exporter = new AsciiExporter(_converter);
-        _exporter.AsciiWidth = Settings.Width;
-        
-        return true;
-    }
-    
+    private const string VideoFilter =
+        "Видео|*.mp4;*.avi;*.mov;*.mkv|Все файлы|*.*";
+
+    private const string DialogTitle = "Выберите видео";
+
+    protected override string GetFileFilter() => VideoFilter;
+
+    protected override string GetFileDialogTitle() => DialogTitle;
+
     protected override async Task ExecuteConversionAsync()
     {
-        var classifier = ColorClassifierRegistry.GetClassifier(Settings.PaletteType);
-        var videoConverter = new VideoToAsciiConverter(_exporter);
-        
+        var classifier = ColorClassifierFactory
+            .Create(Settings.PaletteType);
+
+        var videoConverter = new VideoToAsciiConverter(AsciiExporter);
+
         await videoConverter.InitializeAsync();
-        
-        var nameBuilder = new OutputNameBuilder(Settings);
-        string outputPath = nameBuilder.BuildVideo();
-        
+
+        var outputPath = new OutputNameBuilder(Settings)
+            .BuildVideo();
+
         ConsoleUI.ShowProgress("Начинаем конвертацию видео...");
-        
-        await videoConverter.Convert(Settings.InputFilePath, outputPath, classifier);
-        
+
+        await videoConverter.Convert(
+            Settings.InputFilePath,
+            outputPath,
+            classifier);
+
         ConsoleUI.ShowFileResult(outputPath);
     }
 }

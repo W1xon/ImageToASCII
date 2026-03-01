@@ -1,4 +1,4 @@
-﻿using ImageToASCII.Core.Converters;
+﻿using ImageToASCII.ColorSystem;
 using ImageToASCII.Core.Processors;
 using ImageToASCII.Services;
 using ImageToASCII.UI;
@@ -6,48 +6,49 @@ using SkiaSharp;
 
 namespace ImageToASCII.Application;
 
-
-public class ImageToTextHandler : BaseHandler
+public sealed class ImageToTextHandler : AsciiHandlerBase
 {
-    private BitmapToAsciiConverter _converter;
-    private TextAsciiExporter _exporter;
-    
-    protected override string GetFileFilter()
+    private const string ImageFilter =
+        "Изображения|*.bmp;*.png;*.jpg;*.jpeg;*.gif;*.webp|Все файлы|*.*";
+
+    private const string DialogTitle = "Выберите изображение";
+
+    private TextAsciiExporter _textExporter = null!;
+
+    protected override string GetFileFilter() => ImageFilter;
+
+    protected override string GetFileDialogTitle() => DialogTitle;
+
+    protected override PaletteType AskPaletteType()
     {
-        return "Изображения|*.bmp;*.png;*.jpg;*.jpeg;*.gif;*.webp|Все файлы|*.*";
+        return 0; // текстовый режим без цветовой классификации
     }
-    
-    protected override string GetFileDialogTitle()
-    {
-        return "Выберите изображение";
-    }
-    
+
     protected override bool CollectSettings()
     {
-        Settings.AsciiPalette = ConsoleUI.AskAsciiPalette();
-        Settings.Width = ConsoleUI.AskWidth();
-        Settings.PaletteType = 0;
-        
-        _converter = new BitmapToAsciiConverter(Settings.AsciiPalette);
-        _exporter = new TextAsciiExporter(_converter);
-        _exporter.AsciiWidth = Settings.Width;
-        
+        base.CollectSettings();
+
+        _textExporter = new TextAsciiExporter(AsciiConverter)
+        {
+            AsciiWidth = Settings.Width
+        };
+
         return true;
     }
-    
+
     protected override async Task ExecuteConversionAsync()
     {
-        using var bitmap = SKBitmap.Decode(Settings.InputFilePath);
-        
-        var nameBuilder = new OutputNameBuilder(Settings);
-        string outputPath = nameBuilder.BuildText();
-        
+        using var sourceBitmap = SKBitmap.Decode(Settings.InputFilePath);
+
+        var outputPath = new OutputNameBuilder(Settings)
+            .BuildText();
+
         ConsoleUI.ShowProgress("Сохранение в текстовый файл...");
-        
-        _exporter.SaveToFile(bitmap, outputPath);
-        
+
+        _textExporter.SaveToFile(sourceBitmap, outputPath);
+
         ConsoleUI.ShowFileResult(outputPath);
-        
+
         await Task.CompletedTask;
     }
 }

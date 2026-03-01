@@ -6,41 +6,55 @@ using SkiaSharp;
 
 namespace ImageToASCII.Core.Processors;
 
-public class TextAsciiExporter  : ImageProcessorBase
+public class TextAsciiExporter : ImageProcessorBase
 {
     public int MaxLineLength { get; set; } = 0;
 
     public TextAsciiExporter(BitmapToAsciiConverter converter) : base(converter)
     {
-        _asciiConverter = converter;
     }
-
 
     public void SaveToFile(SKBitmap bitmap, string outputPath, bool showUi = true)
     {
         if (showUi) ConsoleUI.ShowProgress("Генерация ASCII (txt)...");
+
         string text = GetAsciiText(bitmap);
+
         Directory.CreateDirectory(Path.GetDirectoryName(outputPath) ?? ".");
+
         File.WriteAllText(outputPath, text, Encoding.UTF8);
+
         if (showUi) ConsoleUI.WriteSuccess($"Сохранён TXT: {Path.GetFileName(outputPath)}");
     }
 
     private string GetAsciiText(SKBitmap bitmap)
     {
-        var resized = ResizeBitmap(bitmap, true);
-        var grid = _asciiConverter.Convert(resized);
-        int rows = grid.GetLength(0);
-        int cols = grid.GetLength(1);
-        var sb = new StringBuilder(rows * (cols + 2));
+        char[,] grid = _asciiConverter.Convert(bitmap);
 
-        for (int y = 0; y < rows; y++)
+        int height = grid.GetLength(0);
+        int width = grid.GetLength(1);
+
+        var sb = new StringBuilder(height * (width + 1));
+
+        for (int y = 0; y < height; y++)
         {
-            for (int x = 0; x < cols; x++)
-                sb.Append(grid[y, x]);
+            int lineLength = 0;
 
-            sb.AppendLine();
+            for (int x = 0; x < width; x++)
+            {
+                sb.Append(grid[y, x]);
+                lineLength++;
+
+                if (MaxLineLength > 0 && lineLength >= MaxLineLength)
+                {
+                    sb.Append('\n');
+                    lineLength = 0;
+                }
+            }
+
+            sb.Append('\n'); 
         }
 
-        return sb.ToString(); 
+        return sb.ToString();
     }
 }

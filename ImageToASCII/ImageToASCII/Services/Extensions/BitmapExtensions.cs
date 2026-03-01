@@ -7,6 +7,8 @@ public static class BitmapExtensions
 {
     public static uint[] Colors;
 
+    private static readonly byte[] GammaLut = BuildGammaLut(0.8f);
+
     public static unsafe void ToGrayscale(this SKBitmap bitmap, IColorClassifier classifier)
     {
         int width = bitmap.Width;
@@ -22,7 +24,6 @@ public static class BitmapExtensions
 
         byte* ptr = (byte*)pixelsAddr;
 
-        
         ProcessBGRA(ptr, width, height, bitmap.RowBytes, classifier);
 
         bitmap.NotifyPixelsChanged();
@@ -44,19 +45,31 @@ public static class BitmapExtensions
                 byte b = p[0];
                 byte g = p[1];
                 byte r = p[2];
-                byte a = p[3];
 
                 Colors[idx] = classifier.GetColor(r, g, b);
 
-                byte gray = (byte)((r * 30 + g * 59 + b * 11) / 100);
+                int grayInt = (r * 77 + g * 150 + b * 29) >> 8;
+                byte finalGray = GammaLut[grayInt];
 
-                p[0] = gray;
-                p[1] = gray;
-                p[2] = gray;
+                p[0] = finalGray;
+                p[1] = finalGray;
+                p[2] = finalGray;
 
                 idx++;
             }
         }
     }
 
+    private static byte[] BuildGammaLut(float gamma)
+    {
+        var lut = new byte[256];
+
+        for (int i = 0; i < 256; i++)
+        {
+            float normalized = i / 255f;
+            float corrected = MathF.Pow(normalized, gamma);
+            lut[i] = (byte)(corrected * 255f);
+        }
+        return lut;
+    }
 }
