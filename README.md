@@ -61,8 +61,15 @@
 ### 🖼️ Изображения → ASCII
 
 <div align="center">
-  <img src="Assets/Image1.png" width="40%" alt="Оригинал">
-  <img src="Assets/Image1_ASCII.png" width="40%" alt="ASCII">
+  <img src="Assets/Image1.png" width="30%" alt="Оригинал">
+  <img src="Assets/Image1_ASCII.png" width="30%" alt="ASCII">
+  <img src="Assets/Image2.jpg" width="30%" alt="Оригинал">
+</div>
+
+<div align="center">
+  <img src="Assets/Image2_ASCII.png" width="30%" alt="ASCII">
+  <img src="Assets/Image3.jpg" width="30%" alt="Оригинал">
+  <img src="Assets/Image3_ASCII.png" width="30%" alt="ASCII">
   <p><sub>Слева — реальность. Справа — то, чем она стала.</sub></p>
 </div>
 
