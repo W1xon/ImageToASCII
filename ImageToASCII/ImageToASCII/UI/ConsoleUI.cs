@@ -129,9 +129,17 @@ public static class ConsoleUI
     {
         Console.WriteLine();
         WriteInfo($"Открытие диалога выбора файла...");
-
-        var selectedFile = DialogHelper.ShowOpenFileDialog(filter, title);
-
+        string? selectedFile = string.Empty;
+        if (OperatingSystem.IsWindows())
+        {
+#if WINDOWS
+        selectedFile = WindowsDialogHelper.GetPath(filter, title);
+#endif
+        }
+        else
+        {
+            selectedFile = LinuxDialogHelper.GetPath(filter, title);
+        }
         if (selectedFile != null)
         {
             WriteSuccess($"Выбран: {Path.GetFileName(selectedFile)}");

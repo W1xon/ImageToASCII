@@ -92,55 +92,92 @@ public static class FFmpegBootstrapper
     }
 
     private static async Task<bool> DeployLinuxAsync(string targetDir)
+{
+    string arch = RuntimeInformation.ProcessArchitecture switch
     {
-        string arch = RuntimeInformation.ProcessArchitecture switch
+        Architecture.X64   => "64",
+        Architecture.Arm64 => "arm-64",
+        _ => throw new PlatformNotSupportedException($"Архитектура {RuntimeInformation.ProcessArchitecture} не поддерживается.")
+    };
+
+    string gitHubVersion = "6.1";
+    
+    string ffmpegUrl  = $"https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v{gitHubVersion}/ffmpeg-{gitHubVersion}-linux-{arch}.zip";
+    string ffprobeUrl = $"https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v{gitHubVersion}/ffprobe-{gitHubVersion}-linux-{arch}.zip";
+
+    string ffmpegZip  = Path.Combine(targetDir, "ffmpeg-linux.zip");
+    string ffprobeZip = Path.Combine(targetDir, "ffprobe-linux.zip");
+    string tempDir    = Path.Combine(targetDir, TEMP_DIR_NAME);
+
+    try
+    {
+        if (Directory.Exists(tempDir)) 
+            Directory.Delete(tempDir, true);
+
+        Directory.CreateDirectory(tempDir);
+        
+        ConsoleUI.ShowProgress("Загрузка ffmpeg...");
+        await DownloadFileAsync(ffmpegUrl, ffmpegZip);
+
+        ConsoleUI.ShowProgress("Загрузка ffprobe...");
+        await DownloadFileAsync(ffprobeUrl, ffprobeZip);
+
+        ConsoleUI.ShowProgress("Распаковка...");
+        ZipFile.ExtractToDirectory(ffmpegZip, tempDir);
+        ZipFile.ExtractToDirectory(ffprobeZip, tempDir);
+
+        if (!LocateAndMoveBinaries(tempDir, targetDir, "ffmpeg", "ffprobe"))
         {
-            Architecture.X64   => "amd64",
-            Architecture.Arm64 => "arm64",
-            Architecture.Arm   => "armhf",
-            _ => throw new PlatformNotSupportedException($"Архитектура {RuntimeInformation.ProcessArchitecture} не поддерживается.")
-        };
-
-        string url     = $"https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-{arch}-static.tar.xz";
-        string tarPath = Path.Combine(targetDir, "ffmpeg.tar.xz");
-        string tempDir = Path.Combine(targetDir, TEMP_DIR_NAME);
-
-        try
-        {
-            await DownloadFileAsync(url, tarPath);
-            Directory.CreateDirectory(tempDir);
-
-            int exitCode = await RunProcessAsync("tar", $"-xJf \"{tarPath}\" -C \"{tempDir}\"");
-            if (exitCode != 0)
-            {
-                ConsoleUI.WriteError("Ошибка распаковки tar.xz.");
-                return false;
-            }
-
-            if (!LocateAndMoveBinaries(tempDir, targetDir, "ffmpeg", "ffprobe"))
-                return false;
-
-            MakeExecutable(Path.Combine(targetDir, "ffmpeg"));
-            MakeExecutable(Path.Combine(targetDir, "ffprobe"));
-            return true;
-        }
-        catch (Exception ex)
-        {
-            ConsoleUI.WriteError($"Ошибка (Linux): {ex.Message}");
+            ConsoleUI.WriteError("Не удалось перенести распакованные файлы.");
             return false;
         }
-        finally
-        {
-            Cleanup(tarPath, tempDir);
-        }
+
+        MakeExecutable(Path.Combine(targetDir, "ffmpeg"));
+        MakeExecutable(Path.Combine(targetDir, "ffprobe"));
+        return true;
     }
+    catch (Exception ex)
+    {
+        ConsoleUI.WriteError($"Ошибка (Linux): {ex.Message}");
+        return false;
+    }
+    finally
+    {
+        Cleanup(ffmpegZip, tempDir);
+        Cleanup(ffprobeZip, tempDir);
+    }
+}
 
     private static async Task DownloadFileAsync(string url, string destPath)
     {
         using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
-        await using var fs = new FileStream(destPath, FileMode.Create, FileAccess.Write, FileShare.None);
-        await response.Content.CopyToAsync(fs);
+
+        var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+        await using var downloadStream = await response.Content.ReadAsStreamAsync();
+        await using var fileStream = new FileStream(destPath, FileMode.Create, FileAccess.Write, FileShare.None);
+
+        var buffer = new byte[128 * 1024]; 
+        long totalReadBytes = 0;
+        int readBytes;
+        int lastPercentage = -1; 
+
+        while ((readBytes = await downloadStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+        {
+            await fileStream.WriteAsync(buffer, 0, readBytes);
+            totalReadBytes += readBytes;
+
+            if (totalBytes != -1)
+            {
+                int percentage = (int)((totalReadBytes * 100) / totalBytes);
+            
+                if (percentage != lastPercentage)
+                {
+                    lastPercentage = percentage;
+                    ConsoleUI.ShowProgress($"Загрузка: {percentage}% ({totalReadBytes / 1024 / 1024}MB / {totalBytes / 1024 / 1024}MB)");
+                }
+            }
+        }
     }
 
     private static bool LocateAndMoveBinaries(string sourceDir, string targetDir, string ffmpegName, string ffprobeName)
