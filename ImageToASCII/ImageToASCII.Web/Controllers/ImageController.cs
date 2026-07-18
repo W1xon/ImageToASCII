@@ -1,6 +1,8 @@
+using ImageToASCII.Core.Models;
+using ImageToASCII.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace WebApi.Controllers;
+namespace ImageToASCII.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -13,7 +15,13 @@ public class ImageController : ControllerBase
         { ".png",  new byte[] { 0x89, 0x50, 0x4E, 0x47 } },
         { ".gif",  new byte[] { 0x47, 0x49, 0x46 } },
     };
+
+    private readonly ConversionQueue _queue;
     
+    public ImageController(ConversionQueue queue)
+    {
+        _queue = queue;
+    }
     [HttpGet]
     public IActionResult Get()
     {
@@ -68,6 +76,28 @@ public class ImageController : ControllerBase
         {
             await file.CopyToAsync(stream);
         }
+        
+        await ConvertImg(filePath);
+        
         return Ok(new { message = "Файл успешно сохранен", fileName = file.FileName, fullPath = filePath });
+    }
+
+    private async Task ConvertImg(string filePath)
+    {
+        var settings = new ConversionSettings
+        {
+            InputFilePath = filePath,
+            Width = 150,
+        };
+
+        var job = new ConversionJob
+        {
+            Type = JobType.ImageToAscii,
+            Settings = settings,
+            OutputPath = $"{filePath}"
+        };
+
+        await _queue.EnqueueAsync(job);
+        await job.CompletionSource.Task;
     }
 }

@@ -4,7 +4,7 @@ namespace ImageToASCII.Core.Models;
 public class ConversionSettings
 {
     public string InputFilePath { get; set; } = "";
-    public PaletteType PaletteType { get; set; } = PaletteType.Basic;
+    public PaletteType PaletteType { get; set; } = PaletteType.Natural;
     public int Width { get; set; } = 80;
     public AsciiPalette AsciiPalette { get; set; } = AsciiPaletteRegistry.Basic; 
     public string OutputDirectory { get; set; } =

@@ -24,7 +24,7 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
             _stringCache[(char)i] = ((char)i).ToString();
     }
 
-    private  SKTypeface LoadBestMonospaceTypeface()
+    private SKTypeface LoadBestMonospaceTypeface()
     {
         string[] candidates = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? new[] { "Consolas", "Courier New", "Lucida Console", "monospace" }
