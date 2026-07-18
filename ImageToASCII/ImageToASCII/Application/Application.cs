@@ -8,11 +8,12 @@ public sealed class Application
 
     public Application()
     {
+        ConsoleReporter consoleReporter = new ConsoleReporter();
         _handlers = new Dictionary<int, BaseHandler>
         {
-            [1] = new ImageToAsciiHandler(),
-            [2] = new ImageToTextHandler(),
-            [3] = new VideoToAsciiHandler()
+            [1] = new ImageToAsciiHandler(consoleReporter),
+            [2] = new ImageToTextHandler(consoleReporter),
+            [3] = new VideoToAsciiHandler(consoleReporter)
         };
     }
 

@@ -1,5 +1,4 @@
 ﻿using SkiaSharp;
-using ImageToASCII.Core.Models;
 
 namespace ImageToASCII.Core.Converters;
 

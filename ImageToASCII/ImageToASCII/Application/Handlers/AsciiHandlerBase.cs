@@ -1,11 +1,12 @@
 using ImageToASCII.ColorSystem;
+using ImageToASCII.Core;
 using ImageToASCII.Core.Converters;
 using ImageToASCII.Core.Processors;
 using ImageToASCII.UI;
 
 namespace ImageToASCII.Application;
 
-public abstract class AsciiHandlerBase : BaseHandler
+public abstract class AsciiHandlerBase(IReporter reporter) : BaseHandler(reporter)
 {
     protected BitmapToAsciiConverter AsciiConverter { get; private set; } = null!;
     protected AsciiExporter AsciiExporter { get; private set; } = null!;
@@ -29,8 +30,7 @@ public abstract class AsciiHandlerBase : BaseHandler
     private void InitializeAsciiPipeline()
     {
         AsciiConverter = new BitmapToAsciiConverter(Settings.AsciiPalette.Characters.ToArray());
-
-        AsciiExporter = new AsciiExporter(AsciiConverter)
+        AsciiExporter = new AsciiExporter(AsciiConverter, Reporter)
         {
             AsciiWidth = Settings.Width
         };

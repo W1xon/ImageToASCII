@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using ImageToASCII.ColorSystem;
-using ImageToASCII.UI;
 using SkiaSharp;
 
 namespace ImageToASCII.Core.Processors;
@@ -9,16 +8,17 @@ public class VideoToAsciiConverter
 {
     private readonly VideoRecorder _videoRecorder;
     private readonly AsciiExporter _asciiExporter;
-
-    public VideoToAsciiConverter(AsciiExporter asciiExporter)
+    private IReporter _reporter;
+    public VideoToAsciiConverter(AsciiExporter asciiExporter, IReporter reporter)
     {
+        _reporter = reporter;
         _asciiExporter = asciiExporter;
-        _videoRecorder = new VideoRecorder();
+        _videoRecorder = new VideoRecorder(reporter);
     }
 
     public async Task InitializeAsync()
     {
-        ConsoleUI.ShowProgress("Запуск проверки FFmpeg...");
+        _reporter.ShowInfo("Запуск проверки FFmpeg...");
 
         if (!await _videoRecorder.InitializeFFmpegAsync())
             throw new InvalidOperationException("Не удалось инициализировать FFmpeg.");
@@ -32,8 +32,8 @@ public class VideoToAsciiConverter
         bool isRecordingStarted = false;
 
         Console.CursorVisible = false;
-        ConsoleUI.WriteHeader("--- Обработка ASCII-Видео ---");
-        ConsoleUI.WriteInfo($"Файл: {Path.GetFileName(inputFile)}");
+        _reporter.ShowHeader("--- Обработка ASCII-Видео ---");
+        _reporter.ShowInfo($"Файл: {Path.GetFileName(inputFile)}");
 
         try
         {
@@ -64,7 +64,7 @@ public class VideoToAsciiConverter
             }
 
             Console.WriteLine();
-            ConsoleUI.WriteInfo("Финализация видеофайла...");
+            _reporter.ShowInfo("Финализация видеофайла...");
 
             await _videoRecorder.StopRecordingAsync();
             _videoRecorder.MergeAudio(inputFile, outputFile);
@@ -72,7 +72,7 @@ public class VideoToAsciiConverter
         catch (Exception ex)
         {
             Console.WriteLine();
-            ConsoleUI.WriteError($"Ошибка при конвертации: {ex.Message}");
+            _reporter.ShowError($"Ошибка при конвертации: {ex.Message}");
         }
         finally
         {
@@ -82,10 +82,10 @@ public class VideoToAsciiConverter
 
         totalTimer.Stop();
         Console.WriteLine();
-        ConsoleUI.WriteSuccess("Обработка завершена успешно!");
-        ConsoleUI.WriteInfo($"Всего кадров: {frameNumber}");
-        ConsoleUI.WriteInfo($"Средняя скорость: {frameNumber / totalTimer.Elapsed.TotalSeconds:F2} FPS");
-        ConsoleUI.WriteInfo($"Затрачено времени: {totalTimer.Elapsed.TotalSeconds:F2} сек");
+        _reporter.ShowSuccess("Обработка завершена успешно!");
+        _reporter.ShowInfo($"Всего кадров: {frameNumber}");
+        _reporter.ShowInfo($"Средняя скорость: {frameNumber / totalTimer.Elapsed.TotalSeconds:F2} FPS");
+        _reporter.ShowInfo($"Затрачено времени: {totalTimer.Elapsed.TotalSeconds:F2} сек");
         Console.WriteLine(new string('-', 40));
     }
 }

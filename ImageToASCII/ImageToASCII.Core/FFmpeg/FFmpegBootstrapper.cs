@@ -1,28 +1,32 @@
 ﻿using System.IO.Compression;
 using System.Net;
 using System.Runtime.InteropServices;
-using ImageToASCII.UI;
+using ImageToASCII.Core;
 
 namespace ImageToASCII.Services;
 
-public static class FFmpegBootstrapper
+public  class FFmpegBootstrapper
 {
     private const string FFMPEG_VERSION = "6.1";
     private const string TEMP_DIR_NAME = "temp_extract";
 
-    private static bool _isReady;
-    private static string? _ffmpegPath;
+    private  bool _isReady;
+    private  string? _ffmpegPath;
 
-    private static readonly HttpClient _httpClient = new(
+    private  readonly HttpClient _httpClient = new(
         new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All })
     {
         Timeout = TimeSpan.FromMinutes(5)
     };
 
-    private static string FfmpegExeName  => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffmpeg.exe"  : "ffmpeg";
-    private static string FfprobeExeName => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffprobe.exe" : "ffprobe";
-
-    public static async Task<bool> EnsureFFmpegAsync(string targetDir)
+    private  string FfmpegExeName  => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffmpeg.exe"  : "ffmpeg";
+    private  string FfprobeExeName => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffprobe.exe" : "ffprobe";
+    private IReporter _reporter;
+    public FFmpegBootstrapper(IReporter reporter)
+    {
+        _reporter = reporter;
+    }
+    public  async Task<bool> EnsureFFmpegAsync(string targetDir)
     {
         if (_isReady) return true;
 
@@ -34,7 +38,7 @@ public static class FFmpegBootstrapper
 
         ConfigureSecurity();
         Directory.CreateDirectory(targetDir);
-        ConsoleUI.ShowProgress($"Загрузка FFmpeg {FFMPEG_VERSION}...");
+        _reporter.ShowInfo($"Загрузка FFmpeg {FFMPEG_VERSION}...");
 
         if (await TryDeployFFmpegAsync(targetDir))
         {
@@ -46,16 +50,16 @@ public static class FFmpegBootstrapper
         return _isReady = false;
     }
 
-    private static bool CheckLocalFiles(string targetDir) =>
+    private  bool CheckLocalFiles(string targetDir) =>
         File.Exists(Path.Combine(targetDir, FfmpegExeName)) &&
         File.Exists(Path.Combine(targetDir, FfprobeExeName));
 
-    private static void ConfigureSecurity()
+    private  void ConfigureSecurity()
     {
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
     }
 
-    private static async Task<bool> TryDeployFFmpegAsync(string targetDir)
+    private  async Task<bool> TryDeployFFmpegAsync(string targetDir)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return await DeployWindowsAsync(targetDir);
@@ -63,11 +67,11 @@ public static class FFmpegBootstrapper
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             return await DeployLinuxAsync(targetDir);
 
-        ConsoleUI.WriteError("Платформа не поддерживается для автоматической загрузки FFmpeg.");
+        _reporter.ShowError("Платформа не поддерживается для автоматической загрузки FFmpeg.");
         return false;
     }
 
-    private static async Task<bool> DeployWindowsAsync(string targetDir)
+    private  async Task<bool> DeployWindowsAsync(string targetDir)
     {
         string zipPath = Path.Combine(targetDir, "ffmpeg.zip");
         string tempDir = Path.Combine(targetDir, TEMP_DIR_NAME);
@@ -82,7 +86,7 @@ public static class FFmpegBootstrapper
         }
         catch (Exception ex)
         {
-            ConsoleUI.WriteError($"Ошибка (Windows): {ex.Message}");
+            _reporter.ShowError($"Ошибка (Windows): {ex.Message}");
             return false;
         }
         finally
@@ -91,7 +95,7 @@ public static class FFmpegBootstrapper
         }
     }
 
-    private static async Task<bool> DeployLinuxAsync(string targetDir)
+    private  async Task<bool> DeployLinuxAsync(string targetDir)
 {
     string arch = RuntimeInformation.ProcessArchitecture switch
     {
@@ -116,19 +120,19 @@ public static class FFmpegBootstrapper
 
         Directory.CreateDirectory(tempDir);
         
-        ConsoleUI.ShowProgress("Загрузка ffmpeg...");
+        _reporter.ShowInfo("Загрузка ffmpeg...");
         await DownloadFileAsync(ffmpegUrl, ffmpegZip);
 
-        ConsoleUI.ShowProgress("Загрузка ffprobe...");
+        _reporter.ShowInfo("Загрузка ffprobe...");
         await DownloadFileAsync(ffprobeUrl, ffprobeZip);
 
-        ConsoleUI.ShowProgress("Распаковка...");
+        _reporter.ShowInfo("Распаковка...");
         ZipFile.ExtractToDirectory(ffmpegZip, tempDir);
         ZipFile.ExtractToDirectory(ffprobeZip, tempDir);
 
         if (!LocateAndMoveBinaries(tempDir, targetDir, "ffmpeg", "ffprobe"))
         {
-            ConsoleUI.WriteError("Не удалось перенести распакованные файлы.");
+            _reporter.ShowError("Не удалось перенести распакованные файлы.");
             return false;
         }
 
@@ -138,7 +142,7 @@ public static class FFmpegBootstrapper
     }
     catch (Exception ex)
     {
-        ConsoleUI.WriteError($"Ошибка (Linux): {ex.Message}");
+        _reporter.ShowError($"Ошибка (Linux): {ex.Message}");
         return false;
     }
     finally
@@ -148,7 +152,7 @@ public static class FFmpegBootstrapper
     }
 }
 
-    private static async Task DownloadFileAsync(string url, string destPath)
+    private  async Task DownloadFileAsync(string url, string destPath)
     {
         using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
@@ -174,13 +178,13 @@ public static class FFmpegBootstrapper
                 if (percentage != lastPercentage)
                 {
                     lastPercentage = percentage;
-                    ConsoleUI.ShowProgress($"Загрузка: {percentage}% ({totalReadBytes / 1024 / 1024}MB / {totalBytes / 1024 / 1024}MB)");
+                    _reporter.ShowInfo($"Загрузка: {percentage}% ({totalReadBytes / 1024 / 1024}MB / {totalBytes / 1024 / 1024}MB)");
                 }
             }
         }
     }
 
-    private static bool LocateAndMoveBinaries(string sourceDir, string targetDir, string ffmpegName, string ffprobeName)
+    private  bool LocateAndMoveBinaries(string sourceDir, string targetDir, string ffmpegName, string ffprobeName)
     {
         var ffmpeg  = Directory.EnumerateFiles(sourceDir, ffmpegName,  SearchOption.AllDirectories).FirstOrDefault();
         var ffprobe = Directory.EnumerateFiles(sourceDir, ffprobeName, SearchOption.AllDirectories).FirstOrDefault();
@@ -192,13 +196,13 @@ public static class FFmpegBootstrapper
         return true;
     }
 
-    private static void MakeExecutable(string filePath)
+    private  void MakeExecutable(string filePath)
     {
         var chmod = System.Diagnostics.Process.Start("chmod", $"+x \"{filePath}\"");
         chmod?.WaitForExit();
     }
 
-    private static async Task<int> RunProcessAsync(string fileName, string arguments)
+    private  async Task<int> RunProcessAsync(string fileName, string arguments)
     {
         var psi = new System.Diagnostics.ProcessStartInfo(fileName, arguments)
         {
@@ -212,14 +216,14 @@ public static class FFmpegBootstrapper
         return process.ExitCode;
     }
 
-    private static void SetupPaths(string targetDir)
+    private  void SetupPaths(string targetDir)
     {
         _ffmpegPath = targetDir;
         Environment.SetEnvironmentVariable("FFMPEG_PATH",  Path.Combine(targetDir, FfmpegExeName));
         Environment.SetEnvironmentVariable("FFPROBE_PATH", Path.Combine(targetDir, FfprobeExeName));
     }
 
-    private static void Cleanup(string archivePath, string tempDir)
+    private  void Cleanup(string archivePath, string tempDir)
     {
         try
         {
@@ -229,12 +233,12 @@ public static class FFmpegBootstrapper
         catch { /* игнорируем */ }
     }
 
-    private static void ShowFailureMessage(string targetDir)
+    private  void ShowFailureMessage(string targetDir)
     {
-        ConsoleUI.WriteError("Критическая ошибка: FFmpeg не найден.");
-        ConsoleUI.WriteWarning($"Скачайте бинарники вручную и положите в: {targetDir}");
+        _reporter.ShowError("Критическая ошибка: FFmpeg не найден.");
+        _reporter.ShowWarning($"Скачайте бинарники вручную и положите в: {targetDir}");
     }
 
-    public static string GetFFmpegPath() =>
+    public  string GetFFmpegPath() =>
         _ffmpegPath ?? throw new InvalidOperationException("FFmpeg не инициализирован");
 }

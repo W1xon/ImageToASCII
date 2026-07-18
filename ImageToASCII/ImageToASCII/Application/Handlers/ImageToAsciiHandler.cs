@@ -1,11 +1,12 @@
 ﻿using ImageToASCII.ColorSystem;
+using ImageToASCII.Core;
 using ImageToASCII.Services;
 using ImageToASCII.UI;
 using SkiaSharp;
 
 namespace ImageToASCII.Application;
 
-public sealed class ImageToAsciiHandler : AsciiHandlerBase
+public sealed class ImageToAsciiHandler(IReporter reporter) : AsciiHandlerBase(reporter)
 {
     private const string ImageFilter =
         "Изображения|*.bmp;*.png;*.jpg;*.jpeg;*.gif;*.webp|Все файлы|*.*";

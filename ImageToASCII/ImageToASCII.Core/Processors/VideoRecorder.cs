@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using ImageToASCII.Services;
-using ImageToASCII.UI;
 using SkiaSharp;
 
 namespace ImageToASCII.Core.Processors;
@@ -22,18 +21,24 @@ public class VideoRecorder : IDisposable
 
     private static string FfmpegExe  => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffmpeg.exe"  : "ffmpeg";
     private static string FfprobeExe => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffprobe.exe" : "ffprobe";
-
-    public VideoRecorder(int fps = 30) => _fps = fps;
+    private IReporter _reporter;
+    private FFmpegBootstrapper _fFmpegBootstrapper;
+    public VideoRecorder(IReporter reporter, int fps = 30)
+    {
+        _fFmpegBootstrapper = new FFmpegBootstrapper(reporter);
+        _reporter = reporter;
+        _fps = fps;
+    }
 
     public async Task<bool> InitializeFFmpegAsync()
     {
         if (_isFFmpegReady) return true;
 
         string ffmpegDir = Path.Combine(AppContext.BaseDirectory, "ffmpeg");
-        bool ok = await FFmpegBootstrapper.EnsureFFmpegAsync(ffmpegDir);
+        bool ok = await _fFmpegBootstrapper.EnsureFFmpegAsync(ffmpegDir);
         if (!ok)
         {
-            ConsoleUI.WriteError("Не удалось инициализировать FFmpeg");
+            _reporter.ShowError("Не удалось инициализировать FFmpeg");
             _isFFmpegReady = false;
             return false;
         }
@@ -47,7 +52,7 @@ public class VideoRecorder : IDisposable
         if (!_isFFmpegReady)
             throw new InvalidOperationException("FFmpeg не инициализирован");
 
-        string ffmpegDir  = FFmpegBootstrapper.GetFFmpegPath();
+        string ffmpegDir  = _fFmpegBootstrapper.GetFFmpegPath();
         string ffprobePath = Path.Combine(ffmpegDir, FfprobeExe); 
         string ffmpegPath  = Path.Combine(ffmpegDir, FfmpegExe);  
 
@@ -135,9 +140,9 @@ public class VideoRecorder : IDisposable
         _targetWidth  = width  % 2 == 0 ? width  : width  - 1;
         _targetHeight = height % 2 == 0 ? height : height - 1;
 
-        ConsoleUI.ShowInfo($"Запись: {_targetWidth}x{_targetHeight} @ {_fps} FPS");
+        _reporter.ShowInfo($"Запись: {_targetWidth}x{_targetHeight} @ {_fps} FPS");
 
-        string ffmpegDir = FFmpegBootstrapper.GetFFmpegPath();
+        string ffmpegDir = _fFmpegBootstrapper.GetFFmpegPath();
         string ffmpegPath = Path.Combine(ffmpegDir, FfmpegExe);
 
         _outputProcess = new Process
@@ -219,11 +224,11 @@ public class VideoRecorder : IDisposable
         {
             _inputStreamOfOutputProcess?.Close();
             await _outputProcess.WaitForExitAsync();
-            ConsoleUI.ShowInfo("Запись завершена");
+            _reporter.ShowInfo("Запись завершена");
         }
         catch (Exception ex)
         {
-            ConsoleUI.WriteError($"Ошибка остановки: {ex.Message}");
+            _reporter.ShowError($"Ошибка остановки: {ex.Message}");
         }
         finally
         {
@@ -248,15 +253,15 @@ public class VideoRecorder : IDisposable
             Path.GetFileNameWithoutExtension(videoSource) + "_audio" + Path.GetExtension(videoSource)
         );
 
-        ConsoleUI.ShowProgress("Слияние аудио с видео");
+        _reporter.ShowInfo("Слияние аудио с видео");
 
         string args = $"-i \"{audioSource}\" -i \"{videoSource}\" -c:v copy -map 0:a -map 1:v -shortest \"{outputVideo}\" -y";
 
-        string ffmpegDir = FFmpegBootstrapper.GetFFmpegPath();
+        string ffmpegDir = _fFmpegBootstrapper.GetFFmpegPath();
         string ffmpegPath = Path.Combine(ffmpegDir, FfmpegExe);
 
         using var process = new Process { StartInfo = new ProcessStartInfo(ffmpegPath, args) { UseShellExecute = false, CreateNoWindow = true }, EnableRaisingEvents = true };
-        ConsoleUI.ShowProgress("Склейка аудио...");
+        _reporter.ShowInfo("Склейка аудио...");
         process.Start();
         process.WaitForExit();
 
@@ -264,11 +269,11 @@ public class VideoRecorder : IDisposable
         {
             File.Delete(videoSource);
             File.Move(outputVideo, videoSource);
-            ConsoleUI.WriteSuccess("Аудио успешно склеено с видео!");
+            _reporter.ShowSuccess("Аудио успешно склеено с видео!");
         }
         else
         {
-            ConsoleUI.WriteError($"Ошибка FFmpeg (код {process.ExitCode})");
+            _reporter.ShowError($"Ошибка FFmpeg (код {process.ExitCode})");
         }
     }
 
@@ -282,7 +287,7 @@ public class VideoRecorder : IDisposable
                 {
                     string? line = await reader.ReadLineAsync();
                     if (!string.IsNullOrWhiteSpace(line))
-                        ConsoleUI.WriteError($"FFmpeg: {line}");
+                        _reporter.ShowError($"FFmpeg: {line}");
                 }
             }
             catch { }

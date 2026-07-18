@@ -1,7 +1,5 @@
-﻿using System.IO;
-using System.Text;
+﻿using System.Text;
 using ImageToASCII.Core.Converters;
-using ImageToASCII.UI;
 using SkiaSharp;
 
 namespace ImageToASCII.Core.Processors;
@@ -9,14 +7,15 @@ namespace ImageToASCII.Core.Processors;
 public class TextAsciiExporter : ImageProcessorBase
 {
     public int MaxLineLength { get; set; } = 0;
-
-    public TextAsciiExporter(BitmapToAsciiConverter converter) : base(converter)
+    private IReporter _reporter;
+    public TextAsciiExporter(BitmapToAsciiConverter converter, IReporter reporter) : base(converter)
     {
+        _reporter = reporter;
     }
 
     public void SaveToFile(SKBitmap bitmap, string outputPath, bool showUi = true)
     {
-        if (showUi) ConsoleUI.ShowProgress("Генерация ASCII (txt)...");
+        if (showUi) _reporter.ShowInfo("Генерация ASCII (txt)...");
 
         string text = GetAsciiText(bitmap);
 
@@ -24,7 +23,7 @@ public class TextAsciiExporter : ImageProcessorBase
 
         File.WriteAllText(outputPath, text, Encoding.UTF8);
 
-        if (showUi) ConsoleUI.WriteSuccess($"Сохранён TXT: {Path.GetFileName(outputPath)}");
+        if (showUi) _reporter.ShowSuccess($"Сохранён TXT: {Path.GetFileName(outputPath)}");
     }
 
     private string GetAsciiText(SKBitmap bitmap)

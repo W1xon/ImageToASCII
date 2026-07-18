@@ -3,7 +3,6 @@ using SkiaSharp;
 using ImageToASCII.ColorSystem;
 using ImageToASCII.Core.Converters;
 using ImageToASCII.Services;
-using ImageToASCII.UI;
 
 namespace ImageToASCII.Core.Processors;
 
@@ -14,16 +13,18 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
     private readonly Dictionary<char, string> _stringCache = new();
     private float _lastFontSize = -1;
     private float _charWidth;
+    private IReporter _reporter;
 
-    public AsciiExporter(BitmapToAsciiConverter converter) : base(converter)
+    public AsciiExporter(BitmapToAsciiConverter converter, IReporter reporter) : base(converter)
     {
+        _reporter = reporter;
         _typeface = LoadBestMonospaceTypeface();
         
         for (int i = 0; i < 256; i++)
             _stringCache[(char)i] = ((char)i).ToString();
     }
 
-    private static SKTypeface LoadBestMonospaceTypeface()
+    private  SKTypeface LoadBestMonospaceTypeface()
     {
         string[] candidates = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? new[] { "Consolas", "Courier New", "Lucida Console", "monospace" }
@@ -37,7 +38,7 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
             if (tf != null && tf.FamilyName != "Arial" && tf.FamilyName != "sans-serif"
                 && tf.FamilyName != "serif")
             {
-                ConsoleUI.ShowInfo($"Используется шрифт: {tf.FamilyName}");
+                _reporter.ShowInfo($"Используется шрифт: {tf.FamilyName}");
                 return tf;
             }
             tf?.Dispose();
@@ -55,7 +56,7 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
     public SKBitmap PrintAndSave(SKBitmap bmp, IColorClassifier classifier, int fontSize = 16)
     {
         var data = PrepareInternal(bmp, classifier, fontSize, verbose: true);
-        ConsoleUI.ShowProgress("Рендеринг ASCII изображения...");
+        _reporter.ShowInfo("Рендеринг ASCII изображения...");
         return RenderCoreWithProgress(data, fontSize);
     }
 
@@ -141,7 +142,7 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
         }
 
         Console.WriteLine("\r  Прогресс рендеринга: 100%   ");
-        ConsoleUI.WriteSuccess("Рендеринг завершён!");
+        _reporter.ShowSuccess("Рендеринг завершён!");
         return output;
     }
 
@@ -184,8 +185,8 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
         if (verbose)
         {
             Console.WriteLine();
-            ConsoleUI.WriteHeader("--- Информация о генерации ---");
-            ConsoleUI.WriteInfo($"Оригинал: {bitmap.Width}x{bitmap.Height}px");
+            _reporter.ShowHeader("--- Информация о генерации ---");
+            _reporter.ShowInfo($"Оригинал: {bitmap.Width}x{bitmap.Height}px");
         }
 
         float fontAspectRatio = _charWidth / (float)fontSize;
@@ -197,7 +198,7 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
         int w = asciiChars.GetLength(1);
 
         if (verbose)
-            ConsoleUI.WriteInfo($"Размер сетки: {w}x{h} символов");
+            _reporter.ShowInfo($"Размер сетки: {w}x{h} символов");
 
         resized.ToGrayscale(colorClassifier);
 
@@ -206,8 +207,8 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
 
         if (verbose)
         {
-            ConsoleUI.WriteInfo($"Ширина символа: {_charWidth:F2}px, Высота: {fontSize}px");
-            ConsoleUI.WriteInfo($"Финальный холст: {outW}x{outH}px");
+            _reporter.ShowInfo($"Ширина символа: {_charWidth:F2}px, Высота: {fontSize}px");
+            _reporter.ShowInfo($"Финальный холст: {outW}x{outH}px");
             Console.WriteLine();
         }
 

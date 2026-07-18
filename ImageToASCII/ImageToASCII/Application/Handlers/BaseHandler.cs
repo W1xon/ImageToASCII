@@ -1,4 +1,5 @@
-﻿using ImageToASCII.Core.Models;
+﻿using ImageToASCII.Core;
+using ImageToASCII.Core.Models;
 using ImageToASCII.UI;
 
 namespace ImageToASCII.Application;
@@ -6,7 +7,11 @@ namespace ImageToASCII.Application;
 public abstract class BaseHandler
 {
     protected ConversionSettings Settings { get; private set; }
-
+    protected IReporter Reporter;
+    public BaseHandler(IReporter reporter)
+    {
+        Reporter = reporter;
+    }
     public async Task ProcessAsync()
     {
         Initialize();

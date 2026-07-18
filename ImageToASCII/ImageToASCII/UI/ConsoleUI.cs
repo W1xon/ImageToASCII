@@ -4,7 +4,7 @@ using ImageToASCII.Services;
 
 namespace ImageToASCII.UI;
 
-public static class ConsoleUI
+public static class ConsoleUI 
 {
     public static void DrawBanner()
     {

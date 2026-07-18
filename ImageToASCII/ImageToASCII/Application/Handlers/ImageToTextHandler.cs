@@ -1,4 +1,5 @@
 ﻿using ImageToASCII.ColorSystem;
+using ImageToASCII.Core;
 using ImageToASCII.Core.Processors;
 using ImageToASCII.Services;
 using ImageToASCII.UI;
@@ -6,7 +7,7 @@ using SkiaSharp;
 
 namespace ImageToASCII.Application;
 
-public sealed class ImageToTextHandler : AsciiHandlerBase
+public sealed class ImageToTextHandler(IReporter reporter) : AsciiHandlerBase(reporter)
 {
     private const string ImageFilter =
         "Изображения|*.bmp;*.png;*.jpg;*.jpeg;*.gif;*.webp|Все файлы|*.*";
@@ -28,7 +29,7 @@ public sealed class ImageToTextHandler : AsciiHandlerBase
     {
         base.CollectSettings();
 
-        _textExporter = new TextAsciiExporter(AsciiConverter)
+        _textExporter = new TextAsciiExporter(AsciiConverter, Reporter)
         {
             AsciiWidth = Settings.Width
         };

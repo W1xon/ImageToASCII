@@ -2,12 +2,7 @@
 
 class Program
 {
-    [STAThread]
-    static void Main()
-    {
-        Task.Run(async () => await RunAsync()).GetAwaiter().GetResult();
-    }
-    static async Task RunAsync()
+    static async Task Main()
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         Console.Title = "ImageToASCII Converter";

@@ -1,11 +1,12 @@
 ﻿using ImageToASCII.ColorSystem;
+using ImageToASCII.Core;
 using ImageToASCII.Core.Processors;
 using ImageToASCII.Services;
 using ImageToASCII.UI;
 
 namespace ImageToASCII.Application;
 
-public sealed class VideoToAsciiHandler : AsciiHandlerBase
+public sealed class VideoToAsciiHandler(IReporter reporter) : AsciiHandlerBase(reporter)
 {
     private const string VideoFilter =
         "Видео|*.mp4;*.avi;*.mov;*.mkv|Все файлы|*.*";
@@ -21,7 +22,7 @@ public sealed class VideoToAsciiHandler : AsciiHandlerBase
         var classifier = ColorClassifierFactory
             .Create(Settings.PaletteType);
 
-        var videoConverter = new VideoToAsciiConverter(AsciiExporter);
+        var videoConverter = new VideoToAsciiConverter(AsciiExporter, Reporter);
 
         await videoConverter.InitializeAsync();
 

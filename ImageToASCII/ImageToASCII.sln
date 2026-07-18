@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageToASCII", "ImageToASCII\ImageToASCII.csproj", "{86534EF7-8586-441B-8540-DD66787B87D3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageToASCII.Core", "ImageToASCII.Core\ImageToASCII.Core.csproj", "{91D1219E-F720-42B4-981C-BA812E06447D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{86534EF7-8586-441B-8540-DD66787B87D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{86534EF7-8586-441B-8540-DD66787B87D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{86534EF7-8586-441B-8540-DD66787B87D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91D1219E-F720-42B4-981C-BA812E06447D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91D1219E-F720-42B4-981C-BA812E06447D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91D1219E-F720-42B4-981C-BA812E06447D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91D1219E-F720-42B4-981C-BA812E06447D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
