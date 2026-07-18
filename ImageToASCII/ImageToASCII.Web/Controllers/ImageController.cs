@@ -38,16 +38,37 @@ public class ImageController : ControllerBase
     [HttpPost("save")]
     public async Task<IActionResult> Save([FromForm] IFormFile file)
     {
+        bool isValid = await IsValidFile(file);
         
-        if (file is null || file.Length <= 0)
-            return BadRequest("Файл не выбран.");
+        if (!isValid) return BadRequest("Неверный формат файла") ;
         string uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        
+        if (!Directory.Exists(uploadsDir))
+            Directory.CreateDirectory(uploadsDir);
+        
+        string safeFileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+        string filePath = Path.Combine(uploadsDir, safeFileName);
+        Console.WriteLine(filePath);
+        using (FileStream stream = new FileStream(filePath, FileMode.Create))
+        {
+            await file.CopyToAsync(stream);
+        }
+        
+        await ConvertImg(filePath);
+        
+        return Ok(new { message = "Файл успешно сохранен", fileName = file.FileName, fullPath = filePath });
+    }
+
+    private async Task<bool> IsValidFile(IFormFile file)
+    {
+        if (file is null || file.Length <= 0)
+            return false;
         
         string fileExtension = Path.GetExtension(file.FileName);
         
         if (!AllowedExtensionsAndSignatures.ContainsKey(fileExtension))
         {
-            return BadRequest("Недопустимый тип файла. Разрешены только JPG, PNG, GIF.");
+            return false;
         }
         
         bool isValidMedia = false;
@@ -64,24 +85,8 @@ public class ImageController : ControllerBase
             }
         }
 
-        if (!isValidMedia)
-            return BadRequest("Содержимое не соответсвует заявленому");
-        if (!Directory.Exists(uploadsDir))
-            Directory.CreateDirectory(uploadsDir);
-        
-        string safeFileName = $"{Guid.NewGuid()}{fileExtension}";
-        string filePath = Path.Combine(uploadsDir, safeFileName);
-        Console.WriteLine(filePath);
-        using (FileStream stream = new FileStream(filePath, FileMode.Create))
-        {
-            await file.CopyToAsync(stream);
-        }
-        
-        await ConvertImg(filePath);
-        
-        return Ok(new { message = "Файл успешно сохранен", fileName = file.FileName, fullPath = filePath });
+        return isValidMedia;
     }
-
     private async Task ConvertImg(string filePath)
     {
         var settings = new ConversionSettings
