@@ -1,3 +1,4 @@
+using ImageToASCII.ColorSystem;
 using ImageToASCII.Core.Models;
 using ImageToASCII.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -8,18 +9,12 @@ namespace ImageToASCII.Web.Controllers;
 [Route("api/[controller]")]
 public class ImageController : ControllerBase
 {
-    private static readonly Dictionary<string, byte[]> AllowedExtensionsAndSignatures = new(StringComparer.OrdinalIgnoreCase)
-    {
-        { ".jpg",  new byte[] { 0xFF, 0xD8, 0xFF } },
-        { ".jpeg", new byte[] { 0xFF, 0xD8, 0xFF } },
-        { ".png",  new byte[] { 0x89, 0x50, 0x4E, 0x47 } },
-        { ".gif",  new byte[] { 0x47, 0x49, 0x46 } },
-    };
-
     private readonly ConversionQueue _queue;
+    private readonly FileSignatureValidator _validator;
     
-    public ImageController(ConversionQueue queue)
+    public ImageController(ConversionQueue queue, FileSignatureValidator validator)
     {
+        _validator = validator;
         _queue = queue;
     }
     [HttpGet]
@@ -33,12 +28,15 @@ public class ImageController : ControllerBase
     {
         return Ok(new { id });
     }
-
     [RequestSizeLimit(33554432)]
     [HttpPost("save")]
-    public async Task<IActionResult> Save([FromForm] IFormFile file)
+    public async Task<IActionResult> Save(
+        [FromForm] IFormFile file, 
+        [FromForm] PaletteType paletteType, 
+        [FromForm] int paletteIndex, 
+        [FromForm] int width)
     {
-        bool isValid = await IsValidFile(file);
+        bool isValid = await _validator.IsValidFile(file);
         
         if (!isValid) return BadRequest("Неверный формат файла") ;
         string uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
@@ -53,47 +51,20 @@ public class ImageController : ControllerBase
         {
             await file.CopyToAsync(stream);
         }
-        
-        await ConvertImg(filePath);
-        
-        return Ok(new { message = "Файл успешно сохранен", fileName = file.FileName, fullPath = filePath });
-    }
-
-    private async Task<bool> IsValidFile(IFormFile file)
-    {
-        if (file is null || file.Length <= 0)
-            return false;
-        
-        string fileExtension = Path.GetExtension(file.FileName);
-        
-        if (!AllowedExtensionsAndSignatures.ContainsKey(fileExtension))
-        {
-            return false;
-        }
-        
-        bool isValidMedia = false;
-        using (var stream = file.OpenReadStream())
-        {
-            
-            byte[] requiredSignature = AllowedExtensionsAndSignatures[fileExtension];
-            byte[] headerBuffer = new byte[requiredSignature.Length];
-            int byteReads = await stream.ReadAsync(headerBuffer, 0, requiredSignature.Length);
-            
-            if (byteReads >= requiredSignature.Length && headerBuffer.Take(requiredSignature.Length).SequenceEqual(requiredSignature))
-            {
-                isValidMedia = true;
-            }
-        }
-
-        return isValidMedia;
-    }
-    private async Task ConvertImg(string filePath)
-    {
+        paletteIndex = AsciiPaletteRegistry.All.Count < paletteIndex ? AsciiPaletteRegistry.All.Count : paletteIndex;
         var settings = new ConversionSettings
         {
             InputFilePath = filePath,
-            Width = 150,
+            Width = width,
+            PaletteType = paletteType,
+            AsciiPalette = AsciiPaletteRegistry.All[paletteIndex]
         };
+        await ConvertImg(filePath, settings);
+        
+        return Ok(new { message = "Файл успешно сохранен", fileName = file.FileName, fullPath = filePath });
+    }
+    private async Task ConvertImg(string filePath, ConversionSettings settings)
+    {
 
         var job = new ConversionJob
         {

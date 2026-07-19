@@ -52,3 +52,29 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+# Visual Studio
+.vs/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+
+# NuGet
+*.nuget.props
+*.nuget.targets
+packages/
+*.nupkg.metadata
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Rider-specific temp/backup
+*.DotSettings.user
