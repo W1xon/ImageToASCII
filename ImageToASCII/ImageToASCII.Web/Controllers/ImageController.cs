@@ -69,8 +69,8 @@ public class ImageController : ControllerBase
             AsciiPalette = AsciiPaletteRegistry.All[paletteIndex]
         };
         await ConvertImg(filePath, settings);
-        
-        return Ok(new { message = "Файл успешно сохранен", fileName = file.FileName, fullPath = filePath });
+        string contentType = file.ContentType;
+        return PhysicalFile(filePath, contentType);
     }
     private async Task ConvertImg(string filePath, ConversionSettings settings)
     {

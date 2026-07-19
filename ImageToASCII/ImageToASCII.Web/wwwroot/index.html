@@ -2,10 +2,35 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ImageToASCII API</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<h1>ImageToASCII API is running</h1>
-<p>POST /api/image/save — конвертация картинки в ASCII</p>
+<div class="crt-frame">
+    <div class="term-bar">
+        <span class="term-dot"></span>
+        <span class="term-dot"></span>
+        <span class="term-dot"></span>
+        <span class="term-bar-label">imagetoascii — status</span>
+    </div>
+    <div class="term-body">
+        <p class="eyebrow">service online</p>
+        <h1>ImageToASCII API</h1>
+        <p class="subtitle">Конвертер картинок в ASCII-арт. Сервис принимает изображение и палитру символов, отдаёт готовый результат.</p>
+
+        <div class="ascii-rule">░░░░▒▒▒▒▓▓▓▓████████▓▓▓▓▒▒▒▒░░░░</div>
+
+        <div class="route-tag">
+            <span class="method">POST</span>
+            <span>/api/image/save</span>
+        </div>
+
+        <p class="subtitle" style="margin-bottom: 24px;">Загрузи файл через форму — конвертация запустится сразу после отправки.</p>
+
+        <a class="btn" href="/api/image/save">Открыть загрузку →</a>
+    </div>
+    <p class="footnote">wixon shade / imagetoascii</p>
+</div>
 </body>
 </html>
