@@ -28,6 +28,15 @@ public class ImageController : ControllerBase
     {
         return Ok(new { id });
     }
+    
+    [HttpGet("save")]
+    public IActionResult SavePage()
+    {
+        return PhysicalFile(
+            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "upload.html"),
+            "text/html");
+    }
+    
     [RequestSizeLimit(33554432)]
     [HttpPost("save")]
     public async Task<IActionResult> Save(
