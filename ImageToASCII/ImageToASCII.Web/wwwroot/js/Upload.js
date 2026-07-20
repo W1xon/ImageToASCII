@@ -2,6 +2,7 @@ const uploadForm = document.querySelector("#uploadForm");
 const resultStatus = document.querySelector("#resultStatus");
 const resultImage = document.querySelector("#resultImage");
 const resultVideo = document.querySelector("#resultVideo");
+const resultPlaceholder = document.querySelector("#resultPlaceholder");
 const downloadContainer = document.querySelector("#downloadContainer");
 const downloadBtn = document.querySelector("#downloadBtn");
 
@@ -15,6 +16,8 @@ uploadForm.addEventListener("submit", async function (e) {
     resultVideo.style.display = "none";
     downloadContainer.style.display = "none";
 
+    if (resultPlaceholder) resultPlaceholder.style.display = "flex";
+
     try {
         const response = await fetch("/media/convert", {
             method: "POST",
@@ -25,6 +28,8 @@ uploadForm.addEventListener("submit", async function (e) {
             const blob = await response.blob();
             const objectURL = URL.createObjectURL(blob);
             const isVideo = blob.type.startsWith("video/");
+
+            if (resultPlaceholder) resultPlaceholder.style.display = "none";
 
             if (isVideo) {
                 resultVideo.src = objectURL;

@@ -17,6 +17,7 @@
     --success: #639922;
     --success-bg: #eaf3de;
     --success-text: #27500a;
+    --success-border: #c2e09b;
     --danger: #e24b4a;
     --danger-bg: #fcebeb;
     --danger-text: #791f1f;
@@ -49,8 +50,9 @@
         --accent-bg: #2a1a12;
         --accent-text: #f0997b;
         --success: #97c459;
-        --success-bg: #1a2410;
-        --success-text: #c0dd97;
+        --success-bg: #1e2d14;
+        --success-text: #d2f59e;
+        --success-border: #385422;
         --danger: #f09595;
         --danger-bg: #2a1414;
         --danger-text: #f7c1c1;
@@ -103,6 +105,7 @@ body {
     padding: 64px 24px 80px;
     position: relative;
     z-index: 1;
+    transition: max-width 0.2s ease;
 }
 
 /* --- Header / brand --- */
@@ -224,6 +227,16 @@ h1 {
 }
 
 /* --- Buttons --- */
+.btn-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.form-submit-container {
+    text-align: center;
+}
+
 .btn {
     display: inline-flex;
     align-items: center;
@@ -274,15 +287,16 @@ h1 {
 .btn-download {
     background: var(--success-bg);
     color: var(--success-text);
+    border: 1px solid var(--success-border);
     width: 100%;
     box-shadow: none;
 }
 
 .btn-download:hover {
     background: var(--success-bg);
-    filter: brightness(0.96);
+    filter: brightness(1.08);
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .btn-download svg {
@@ -302,6 +316,13 @@ h1 {
 }
 
 /* --- Form --- */
+#uploadForm {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
+}
+
 .form-group {
     display: flex;
     flex-direction: column;
@@ -460,12 +481,6 @@ h1 {
     50% { transform: translate(-50px, -30px) scale(1.08); }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .bg-blob {
-        animation: none !important;
-    }
-}
-
 .file-drop:hover .file-drop-icon {
     color: var(--accent);
 }
@@ -486,13 +501,34 @@ h1 {
     font-weight: 600;
 }
 
-/* --- Result media --- */
+/* --- Result media & placeholder --- */
 #imageContainer {
     margin-top: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 16px;
+    width: 100%;
+}
+
+.preview-placeholder {
+    width: 100%;
+    min-height: 280px;
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+    background: var(--surface-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.preview-placeholder svg {
+    color: var(--text-muted);
 }
 
 #downloadContainer {
@@ -543,6 +579,7 @@ h1 {
 #resultStatus.ok {
     background: var(--success-bg);
     color: var(--success-text);
+    border: 1px solid var(--success-border);
 }
 
 #resultStatus.err {
@@ -577,7 +614,7 @@ h1 {
     text-align: center;
 }
 
-/* --- Responsive --- */
+/* --- Mobile Responsive --- */
 @media (max-width: 600px) {
     .page {
         padding: 32px 16px 60px;
@@ -594,8 +631,72 @@ h1 {
     }
 }
 
+/* --- Desktop Layout (2 Columns) --- */
+@media (min-width: 900px) {
+    .page {
+        max-width: 640px;
+    }
+
+    .page:has(.card-two-cols) {
+        max-width: 1100px;
+    }
+
+    .card-two-cols {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        align-items: stretch;
+    }
+
+    .card-left {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .card-left > div {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .card-right {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 380px;
+        justify-content: space-between;
+    }
+
+    #imageContainer {
+        margin-top: 0;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .preview-placeholder {
+        height: 100%;
+        min-height: 320px;
+    }
+
+    #resultImage,
+    #resultVideo {
+        max-height: 480px;
+        width: 100%;
+        object-fit: contain;
+    }
+
+    #resultStatus {
+        margin-top: 0;
+        margin-bottom: 16px;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .status-dot, .spinner {
+    .status-dot, .spinner, .bg-blob {
         animation: none !important;
     }
 }
