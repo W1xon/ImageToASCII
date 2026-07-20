@@ -20,55 +20,62 @@
         <p class="subtitle">Выбери файл и параметры палитры. Формат: JPG, PNG, GIF, BMP, WEBP.</p>
 
         <form id="uploadForm">
-            <div class="field">
-                <label for="fileInput">file</label>
-                <label class="file-drop" id="fileDrop" for="fileInput">
-                    <span id="fileDropText">Нажми, чтобы выбрать файл</span>
-                    <span class="file-name" id="fileDropName"></span>
-                    <input type="file" id="fileInput" name="file" accept=".jpg,.jpeg,.png,.gif,.bmp,.webp" required>
-                </label>
+            <div class="form-group">
+                <div class="field">
+                    <label for="fileInput">file</label>
+                    <label class="file-drop" id="fileDrop" for="fileInput">
+                        <span id="fileDropText">Нажми, чтобы выбрать файл</span>
+                        <span class="file-name" id="fileDropName"></span>
+                        <input type="file" id="fileInput" name="file" accept=".jpg,.jpeg,.png,.gif,.bmp,.webp" required>
+                    </label>
+                </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label for="paletteType">тип палитры</label>
+                        <select id="paletteType" name="paletteType" required>
+                            <option value="1">Basic — базовая</option>
+                            <option value="2">Palette16 — 16 цветов</option>
+                            <option value="3">Palette7 — 7 цветов</option>
+                            <option value="4" selected>Natural — естественная</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="paletteIndex">набор символов</label>
+                        <select id="paletteIndex" name="paletteIndex" required>
+                            <option value="0" selected>Basic —  .:-=+*#%@</option>
+                            <option value="1">Detailed — .`,:;~+i&gt;rcvunzX0OQmW&amp;8%B@</option>
+                            <option value="2">Geometric —  ·•oO0mM@█</option>
+                            <option value="3">Blocks —  ░▒▓█</option>
+                            <option value="4">Minimal —  .:!i|HM@</option>
+                            <option value="5">Letters —  itrocabpwkNQM@</option>
+                            <option value="6">Lines —  -=≡*#%@</option>
+                            <option value="7">Dense —  .:*o&amp;8#@█</option>
+                            <option value="8">Retro —  .:-=+*xX#%@</option>
+                            <option value="9">AsciiArt —  .,:;+*?%S#@</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="width">width (px)</label>
+                    <input type="number" id="width" name="width" value="200" min="10" max="1200" required>
+                </div>
             </div>
 
-            <div class="field">
-                <label for="paletteType">тип палитры</label>
-                <select id="paletteType" name="paletteType" required>
-                    <option value="1">Basic — базовая</option>
-                    <option value="2">Palette16 — 16 цветов</option>
-                    <option value="3">Palette7 — 7 цветов</option>
-                    <option value="4" selected>Natural — естественная</option>
-                </select>
-            </div>
-
-            <div class="field">
-                <label for="paletteIndex">набор символов</label>
-                <select id="paletteIndex" name="paletteIndex" required>
-                    <option value="0" selected>Basic —  .:-=+*#%@</option>
-                    <option value="1">Detailed — .`,:;~+i&gt;rcvunzX0OQmW&amp;8%B@</option>
-                    <option value="2">Geometric —  ·•oO0mM@█</option>
-                    <option value="3">Blocks —  ░▒▓█</option>
-                    <option value="4">Minimal —  .:!i|HM@</option>
-                    <option value="5">Letters —  itrocabpwkNQM@</option>
-                    <option value="6">Lines —  -=≡*#%@</option>
-                    <option value="7">Dense —  .:*o&amp;8#@█</option>
-                    <option value="8">Retro —  .:-=+*xX#%@</option>
-                    <option value="9">AsciiArt —  .,:;+*?%S#@</option>
-                </select>
-            </div>
-
-            <div class="field">
-                <label for="width">width</label>
-                <input type="number" id="width" name="width" value="500" required>
-            </div>
-
-            <button type="submit" class="btn">Отправить на конвертацию</button>
+            <button type="submit" class="btn" style="width: 100%;">Отправить на конвертацию</button>
         </form>
 
         <div id="resultStatus"></div>
+
         <div id="imageContainer">
-            <img id="resultImage" src="" alt="Результат конвертации">
+            <img id="resultImage" alt="Результат конвертации">
         </div>
     </div>
-    <p class="footnote"><a href="/" class="btn-ghost" style="text-decoration:none; padding:6px 10px; border-radius:6px; font-size:12px;">← на главную</a></p>
+    <p class="footnote">
+        <a href="/" class="btn btn-ghost btn-sm">← на главную</a>
+    </p>
 </div>
 
 <script>

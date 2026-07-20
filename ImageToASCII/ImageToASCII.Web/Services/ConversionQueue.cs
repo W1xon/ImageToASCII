@@ -5,6 +5,9 @@ namespace ImageToASCII.Web;
 
 public class ConversionQueue
 {
-    public readonly Channel<ConversionJob> ConversionChannel = Channel.CreateUnbounded<ConversionJob>();
+    public readonly Channel<ConversionJob> ConversionChannel = Channel.CreateUnbounded<ConversionJob>(new UnboundedChannelOptions
+    {
+        SingleReader = false  
+    });
     public async Task EnqueueAsync(ConversionJob job) => await ConversionChannel.Writer.WriteAsync(job);
 }

@@ -1,118 +1,181 @@
-/* ImageToASCII — terminal/CRT aesthetic */
+/* ImageToASCII — Modern Cyberpunk / CRT Aesthetic */
 
 :root {
-    --bg: #0b0f0d;
-    --bg-raised: #0f1512;
-    --line: #1c2620;
-    --text: #c9f2d8;
-    --text-dim: #6d8a79;
+    --bg: #060907;
+    --bg-raised: #0b110e;
+    --bg-nested: #040605;
+    --line: #1c2a22;
+    --line-active: #345140;
+    --text: #d1f7de;
+    --text-dim: #648772;
     --accent: #4ade80;
-    --accent-dim: #2f7a52;
-    --amber: #e0a02e;
-    --danger: #e0574f;
+    --accent-glow: rgba(74, 222, 128, 0.25);
+    --accent-dim: #1f5c38;
+    --amber: #f59e0b;
+    --amber-glow: rgba(245, 158, 11, 0.2);
+    --danger: #ef4444;
+    --danger-glow: rgba(239, 68, 68, 0.2);
 
     --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --glow-soft: 0 0 16px var(--accent-glow);
+    --glow-intense: 0 0 24px var(--accent);
 }
 
 * {
     box-sizing: border-box;
+    selection-background-color: var(--accent-dim);
+    selection-color: var(--text);
+}
+
+/* Кастомный скроллбар в стиле интерфейсов космических кораблей */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-dim);
 }
 
 html, body {
     margin: 0;
     padding: 0;
+    background: var(--bg);
+    overflow-x: hidden;
 }
 
 body {
-    background: var(--bg);
     color: var(--text);
     font-family: var(--font-mono);
     min-height: 100vh;
+    position: relative;
+}
+
+/* Футуристичный живой фон с эффектом свечения экрана и сетки */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
     background-image:
-            radial-gradient(circle at 20% -10%, rgba(74, 222, 128, 0.06), transparent 40%),
+            radial-gradient(circle at 50% 0%, rgba(74, 222, 128, 0.08), transparent 50%),
+            radial-gradient(circle at 20% 70%, rgba(74, 222, 128, 0.03), transparent 40%),
             repeating-linear-gradient(
                     180deg,
-                    rgba(255, 255, 255, 0.012) 0px,
-                    rgba(255, 255, 255, 0.012) 1px,
+                    rgba(74, 222, 128, 0.015) 0px,
+                    rgba(74, 222, 128, 0.015) 1px,
                     transparent 1px,
                     transparent 3px
             );
+    pointer-events: none;
 }
 
 .crt-frame {
-    max-width: 760px;
+    max-width: 800px;
     margin: 0 auto;
-    padding: 48px 24px 80px;
+    padding: 60px 24px 80px;
 }
 
-/* --- Terminal chrome (fake window bar) --- */
+/* --- Terminal chrome (Fake Window Bar) --- */
 
 .term-bar {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 14px;
+    padding: 12px 18px;
     background: var(--bg-raised);
     border: 1px solid var(--line);
     border-bottom: none;
-    border-radius: 8px 8px 0 0;
+    border-radius: 12px 12px 0 0;
+    position: relative;
+}
+
+/* Эффект стеклянного блика на шапке */
+.term-bar::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--line-active), transparent);
 }
 
 .term-dot {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    background: var(--line);
+    background: var(--line-active);
+    transition: background 0.2s;
+}
+
+.term-bar:hover .term-dot {
+    background: var(--text-dim);
 }
 
 .term-bar-label {
     margin-left: 8px;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-dim);
-    letter-spacing: 0.03em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .term-body {
-    background: var(--bg-raised);
+    background: rgba(11, 17, 14, 0.8);
+    backdrop-filter: blur(8px);
     border: 1px solid var(--line);
-    border-radius: 0 0 8px 8px;
-    padding: 32px 28px 36px;
+    border-radius: 0 0 12px 12px;
+    padding: 40px 40px 48px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
 /* --- Typography --- */
 
 .eyebrow {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 10px;
-    font-size: 12px;
-    letter-spacing: 0.12em;
+    font-size: 11px;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--accent);
-    margin: 0 0 14px;
+    margin: 0 0 20px;
+    padding: 4px 8px;
+    background: rgba(74, 222, 128, 0.05);
+    border-radius: 4px;
+    border: 1px solid rgba(74, 222, 128, 0.1);
 }
 
 .eyebrow::before {
     content: "";
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     background: var(--accent);
     border-radius: 50%;
     box-shadow: 0 0 8px var(--accent);
-    animation: blink 1.6s ease-in-out infinite;
+    animation: blink 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.35; }
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.2; transform: scale(0.9); }
 }
 
 h1 {
-    font-size: 28px;
-    line-height: 1.25;
-    margin: 0 0 8px;
-    color: var(--text);
-    letter-spacing: -0.01em;
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin: 0 0 14px;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
 .subtitle {
@@ -125,136 +188,209 @@ h1 {
 .route-tag {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    background: rgba(74, 222, 128, 0.08);
-    border: 1px solid var(--accent-dim);
-    color: var(--accent);
-    font-size: 13px;
-    padding: 6px 12px;
-    border-radius: 6px;
+    gap: 10px;
+    background: rgba(74, 222, 128, 0.04);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-size: 12px;
+    padding: 8px 14px;
+    border-radius: 8px;
     margin: 0 0 28px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.route-tag:hover {
+    border-color: var(--line-active);
+    box-shadow: var(--glow-soft);
 }
 
 .route-tag .method {
-    font-weight: 700;
+    font-weight: 800;
+    color: var(--accent);
+    text-shadow: 0 0 10px var(--accent-glow);
 }
 
-/* --- ASCII divider (signature element) --- */
+/* --- ASCII Divider --- */
 
 .ascii-rule {
-    color: var(--accent-dim);
-    font-size: 11px;
+    color: var(--line-active);
+    font-size: 12px;
     line-height: 1;
-    letter-spacing: 0;
+    letter-spacing: 2px;
     white-space: pre;
     overflow: hidden;
-    margin: 24px 0;
+    margin: 32px 0;
     user-select: none;
+    opacity: 0.7;
 }
 
-/* --- Buttons / links --- */
+/* --- Buttons --- */
 
 .btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 10px;
     background: var(--accent);
-    color: #06140c;
+    color: #030704;
     font-family: var(--font-mono);
     font-weight: 700;
     font-size: 14px;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 6px;
+    padding: 0 24px;
+    border: 1px solid transparent;
+    border-radius: 8px;
     cursor: pointer;
     text-decoration: none;
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    height: 48px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(74, 222, 128, 0.15);
 }
 
 .btn:hover {
-    box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.18);
+    background: #5eff93;
+    box-shadow: var(--glow-soft), 0 6px 16px rgba(74, 222, 128, 0.25);
+    transform: translateY(-1px);
 }
 
 .btn:active {
     transform: translateY(1px);
+    box-shadow: 0 2px 6px rgba(74, 222, 128, 0.1);
 }
 
 .btn:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
+    outline: none;
+    border-color: #ffffff;
+    box-shadow: var(--glow-intense);
 }
 
 .btn-ghost {
     background: transparent;
     color: var(--text-dim);
     border: 1px solid var(--line);
+    box-shadow: none;
 }
 
 .btn-ghost:hover {
     color: var(--text);
-    border-color: var(--accent-dim);
+    background: rgba(28, 42, 34, 0.2);
+    border-color: var(--line-active);
+    transform: none;
+    box-shadow: none;
 }
 
-/* --- Form elements --- */
+.btn-sm {
+    height: 36px;
+    padding: 0 16px;
+    font-size: 12px;
+    border-radius: 6px;
+}
+
+/* --- Form Elements --- */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 36px;
+}
 
 .field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-bottom: 18px;
+    gap: 10px;
 }
 
 .field label {
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 700;
     color: var(--text-dim);
-    letter-spacing: 0.04em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
+/* Базовые инпуты */
 .field input[type="text"],
-.field input[type="number"],
-.field select {
-    background: var(--bg);
+.field input[type="number"] {
+    background: var(--bg-nested);
     border: 1px solid var(--line);
     color: var(--text);
     font-family: var(--font-mono);
     font-size: 14px;
-    padding: 10px 12px;
-    border-radius: 6px;
+    height: 48px;
+    border-radius: 8px;
     width: 100%;
+    padding: 0 16px;
+    transition: all 0.2s ease;
+}
+
+/* Бронебойный стильный выпадающий список */
+.field select {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+
+    background: var(--bg-nested) !important;
+    border: 1px solid var(--line) !important;
+    color: var(--text) !important;
+    font-family: var(--font-mono) !important;
+    font-size: 14px !important;
+    height: 48px !important;
+    border-radius: 8px !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    padding: 0 54px 0 16px !important;
+    transition: all 0.2s ease;
+
+    /* Дизайнерская стрелочка */
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23648772' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px !important;
+    background-position: calc(100% - 20px) center !important;
+}
+
+/* Стайлинг выпадающих опций внутри комбобокса (чтобы не были белыми) */
+.field select option {
+    background: var(--bg-raised);
+    color: var(--text);
+    padding: 12px;
 }
 
 .field input:focus,
 .field select:focus {
     outline: none;
-    border-color: var(--accent-dim);
-    box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.12);
+    border-color: var(--accent) !important;
+    box-shadow: var(--glow-soft) !important;
+    background: rgba(11, 17, 14, 0.6) !important;
 }
 
 .field-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: 20px;
 }
 
-/* File drop zone */
+/* Advanced File Drop Zone */
 
 .file-drop {
     border: 1px dashed var(--line);
-    border-radius: 8px;
-    padding: 28px 16px;
+    background: rgba(4, 6, 5, 0.4);
+    border-radius: 12px;
+    padding: 40px 20px;
     text-align: center;
     cursor: pointer;
     color: var(--text-dim);
     font-size: 13px;
-    margin-bottom: 20px;
-    transition: border-color 0.15s ease, color 0.15s ease;
+    transition: all 0.2s ease;
     position: relative;
+    display: block;
 }
 
 .file-drop:hover,
 .file-drop.is-dragover {
     border-color: var(--accent);
+    background: rgba(74, 222, 128, 0.02);
     color: var(--text);
+    box-shadow: inset 0 0 20px rgba(74, 222, 128, 0.03);
 }
 
 .file-drop input[type="file"] {
@@ -264,93 +400,116 @@ h1 {
     cursor: pointer;
 }
 
+.file-drop #fileDropText {
+    transition: color 0.2s;
+}
+
+.file-drop:hover #fileDropText {
+    color: var(--accent);
+}
+
 .file-drop .file-name {
     display: block;
-    margin-top: 6px;
+    margin-top: 10px;
     color: var(--accent);
     font-size: 12px;
     word-break: break-all;
+    font-weight: 700;
+    text-shadow: 0 0 8px rgba(74, 222, 128, 0.3);
 }
 
-/* Status / result */
+/* Status / Result Panels */
 
 #resultStatus {
     font-size: 13px;
-    padding: 10px 12px;
-    border-radius: 6px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-top: 24px;
+    margin-bottom: 24px;
     display: none;
+    font-weight: 700;
 }
 
 #resultStatus.visible {
     display: block;
+    animation: slideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 #resultStatus.ok {
-    background: rgba(74, 222, 128, 0.08);
-    border: 1px solid var(--accent-dim);
+    background: rgba(74, 222, 128, 0.06);
+    border: 1px solid rgba(74, 222, 128, 0.3);
     color: var(--accent);
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.05);
 }
 
 #resultStatus.err {
-    background: rgba(224, 87, 79, 0.08);
-    border: 1px solid var(--danger);
+    background: rgba(239, 68, 68, 0.06);
+    border: 1px solid rgba(239, 68, 68, 0.3);
     color: var(--danger);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.05);
 }
 
 #resultStatus.pending {
-    background: rgba(224, 160, 46, 0.08);
-    border: 1px solid var(--amber);
+    background: rgba(245, 158, 11, 0.06);
+    border: 1px solid rgba(245, 158, 11, 0.3);
     color: var(--amber);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.05);
 }
 
 #imageContainer {
-    margin-top: 20px;
+    margin-top: 32px;
 }
 
 #resultImage {
     max-width: 100%;
-    border-radius: 6px;
+    border-radius: 8px;
     border: 1px solid var(--line);
     display: none;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
 }
 
 .footnote {
-    margin-top: 32px;
-    font-size: 12px;
+    margin-top: 48px;
+    font-size: 11px;
     color: var(--text-dim);
     text-align: center;
+    letter-spacing: 0.05em;
 }
 
 /* --- Responsive --- */
 
-@media (max-width: 560px) {
+@media (max-width: 600px) {
     .crt-frame {
-        padding: 24px 12px 56px;
+        padding: 30px 12px 60px;
     }
 
     .term-body {
-        padding: 24px 18px 28px;
+        padding: 28px 20px 36px;
     }
 
     h1 {
-        font-size: 22px;
+        font-size: 24px;
     }
 
     .field-row {
         grid-template-columns: 1fr;
+        gap: 24px;
     }
 
     .ascii-rule {
-        font-size: 8px;
+        font-size: 7px;
+        letter-spacing: 1px;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .eyebrow::before {
-        animation: none;
-    }
-
-    .btn {
-        transition: none;
+    .eyebrow::before, .btn, body::before {
+        animation: none !important;
+        transition: none !important;
     }
 }
