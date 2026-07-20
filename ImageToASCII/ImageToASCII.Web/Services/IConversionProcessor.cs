@@ -5,5 +5,5 @@ namespace ImageToASCII.Web;
 
 public interface IConversionProcessor
 {
-    public void Process(ConversionJob job, IReporter reporter);
+    public Task Process(ConversionJob job, IReporter reporter);
 }

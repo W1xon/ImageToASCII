@@ -3,30 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Upload — ImageToASCII</title>
+    <title>Загрузка — ImageToASCII</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<div class="crt-frame">
-    <div class="term-bar">
-        <span class="term-dot"></span>
-        <span class="term-dot"></span>
-        <span class="term-dot"></span>
-        <span class="term-bar-label">imagetoascii — upload</span>
-    </div>
-    <div class="term-body">
-        <p class="eyebrow">new conversion</p>
-        <h1>Загрузка картинки</h1>
-        <p class="subtitle">Выбери файл и параметры палитры. Формат: JPG, PNG, GIF, BMP, WEBP.</p>
+<div class="bg-canvas">
+    <div class="bg-blob bg-blob-1"></div>
+    <div class="bg-blob bg-blob-2"></div>
+</div>
+<div class="page">
+    <div class="card">
+        <h1>Новая конвертация</h1>
+        <p class="subtitle">Выбери файл и параметры палитры. Формат: JPG, PNG, GIF, BMP, WEBP, MP4, MOV, AVI, WEBM, MKV, FLV, WMV.</p>
 
         <form id="uploadForm">
             <div class="form-group">
                 <div class="field">
-                    <label for="fileInput">file</label>
+                    <label for="fileInput">файл</label>
                     <label class="file-drop" id="fileDrop" for="fileInput">
+                        <svg class="file-drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 16V4M12 4L7 9M12 4l5 5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
                         <span id="fileDropText">Нажми, чтобы выбрать файл</span>
                         <span class="file-name" id="fileDropName"></span>
-                        <input type="file" id="fileInput" name="file" accept=".jpg,.jpeg,.png,.gif,.bmp,.webp" required>
+                        <input type="file" id="fileInput" name="file" accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.mp4,.mov,.avi,.webm,.mkv,.flv,.wmv" required>
                     </label>
                 </div>
 
@@ -40,7 +41,6 @@
                             <option value="4" selected>Natural — естественная</option>
                         </select>
                     </div>
-
                     <div class="field">
                         <label for="paletteIndex">набор символов</label>
                         <select id="paletteIndex" name="paletteIndex" required>
@@ -59,25 +59,37 @@
                 </div>
 
                 <div class="field">
-                    <label for="width">width (px)</label>
+                    <label for="width">ширина результата (px)</label>
                     <input type="number" id="width" name="width" value="200" min="10" max="1200" required>
+                    <span class="field-hint">от 10 до 1200 пикселей</span>
                 </div>
             </div>
 
-            <button type="submit" class="btn" style="width: 100%;">Отправить на конвертацию</button>
+            <div style="text-align: center;">
+                <button type="submit" class="btn">Отправить на конвертацию</button>
+            </div>
         </form>
 
         <div id="resultStatus"></div>
-
         <div id="imageContainer">
             <img id="resultImage" alt="Результат конвертации">
+            <video id="resultVideo" controls></video>
+        </div>
+        <div id="downloadContainer">
+            <a id="downloadBtn" class="btn btn-download">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16">
+                    <path d="M12 4v12M12 16l-4-4M12 16l4-4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M4 18v1a2 2 0 002 2h12a2 2 0 002-2v-1" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Скачать результат
+            </a>
         </div>
     </div>
+
     <p class="footnote">
         <a href="/" class="btn btn-ghost btn-sm">← на главную</a>
     </p>
 </div>
-
 <script>
     document.getElementById("fileInput").addEventListener("change", function () {
         const nameEl = document.getElementById("fileDropName");

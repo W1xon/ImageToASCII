@@ -32,7 +32,7 @@ public class ConversionImageWorker : BackgroundService
         {
             await foreach (var job in _queue.ConversionChannel.Reader.ReadAllAsync())
             {
-                await Task.Run(() => ProcessJob(job), stoppingToken) ;
+                await Task.Run(async () => await ProcessJob(job), stoppingToken) ;
             }
         }
         catch(OperationCanceledException){}
@@ -41,7 +41,7 @@ public class ConversionImageWorker : BackgroundService
             Console.WriteLine($"Обработчик сломался: {e.Message}");
         }
     }
-    private void ProcessJob(ConversionJob job)
+    private async Task ProcessJob(ConversionJob job)
     {
         var stopwatch = Stopwatch.StartNew();
     
@@ -49,7 +49,7 @@ public class ConversionImageWorker : BackgroundService
         {
             var processor = ConversionProcessorFactory.Create(job.Type);
         
-            processor.Process(job, _reporter);
+            await processor.Process(job, _reporter);
         
             stopwatch.Stop();
         

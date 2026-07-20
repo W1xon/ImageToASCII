@@ -9,7 +9,7 @@ namespace ImageToASCII.Web;
 
 public class ImageConversionProcessor : IConversionProcessor
 {
-    public void Process(ConversionJob job, IReporter reporter)
+    public async Task Process(ConversionJob job, IReporter reporter)
     {
         var converter = new BitmapToAsciiConverter(job.Settings.AsciiPalette.Characters.ToArray());
         var exporter = new AsciiExporter(converter, reporter) { AsciiWidth = job.Settings.Width };

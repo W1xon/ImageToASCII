@@ -7,31 +7,32 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<div class="crt-frame">
-    <div class="term-bar">
-        <span class="term-dot"></span>
-        <span class="term-dot"></span>
-        <span class="term-dot"></span>
-        <span class="term-bar-label">imagetoascii — status</span>
-    </div>
-    <div class="term-body">
-        <p class="eyebrow">service online</p>
-        <h1>ImageToASCII API</h1>
-        <p class="subtitle">Конвертер картинок в ASCII-арт. Сервис принимает изображение и палитру символов, отдаёт готовый результат.</p>
-
-        <div class="ascii-rule">░░░░▒▒▒▒▓▓▓▓████████▓▓▓▓▒▒▒▒░░░░</div>
+<div class="bg-canvas">
+    <div class="bg-blob bg-blob-1"></div>
+    <div class="bg-blob bg-blob-2"></div>
+</div>
+<div class="page">
+    <div class="card">
+        <h1>Конвертер картинок в ASCII-арт</h1>
+        <p class="subtitle">Загрузи изображение или видео, выбери палитру символов — сервис вернёт результат в виде ASCII-графики.</p>
 
         <div class="route-tag">
             <span class="method">POST</span>
-            <span>/api/image/save</span>
+            <span>/media/convert</span>
         </div>
+        
+        <ul class="feature-list">
+            <li>Поддержка изображений и видео: JPG, PNG, GIF, BMP, WEBP, MP4, MOV, AVI, WEBM, MKV, FLV, WMV</li>
+            <li>10 наборов символов — от базового до плотных блоков</li>
+            <li>4 типа палитры: базовая, 16 цветов, 7 цветов, естественная</li>
+            <li>Настраиваемая ширина результата</li>
+        </ul>
 
-        <p class="subtitle">Загрузи файл через форму — конвертация запустится сразу после отправки.</p>
-
-        <div style="margin-top: 32px;">
-            <a class="btn" href="/api/image/save">Открыть загрузку →</a>
+        <div style="text-align: center; margin-top: 8px;">
+            <a class="btn" href="/media/convert">Открыть загрузку →</a>
         </div>
     </div>
+
     <p class="footnote">wixon shade / imagetoascii</p>
 </div>
 </body>

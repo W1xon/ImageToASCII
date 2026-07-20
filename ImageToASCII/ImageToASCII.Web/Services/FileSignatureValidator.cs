@@ -1,3 +1,5 @@
+using ImageToASCII.Web.Models;
+
 namespace ImageToASCII.Web;
 
 public class FileSignatureValidator
@@ -37,25 +39,63 @@ public class FileSignatureValidator
         },
 
         { ".webp", [ [0x52, 0x49, 0x46, 0x46] ] }, // "RIFF"
+        
+        //начиная с 7 номера видеоформаты
+        { ".mp4",
+            [
+                [0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70], // ftyp offset=0, box size 0x18
+                [0x00, 0x00, 0x00, 0x1C, 0x66, 0x74, 0x79, 0x70], // box size 0x1C
+                [0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70], // box size 0x20
+            ]
+        },
+        { ".mov",
+            [
+                [0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70], // ftyp qt
+                [0x66, 0x72, 0x65, 0x65], // free atom variant, offset=4
+                [0x6D, 0x64, 0x61, 0x74], // mdat variant, offset=4
+            ]
+        },
+        { ".avi", [ [0x52, 0x49, 0x46, 0x46] ] }, // RIFF, нужна доп проверка "AVI " на offset 8
+        { ".webm", [ [0x1A, 0x45, 0xDF, 0xA3] ] }, // EBML header
+        { ".mkv", [ [0x1A, 0x45, 0xDF, 0xA3] ] }, // тот же EBML, MKV и WEBM неразличимы по magic bytes
+        { ".flv", [ [0x46, 0x4C, 0x56, 0x01] ] }, // "FLV" + version 1
+        { ".wmv", [ [0x30, 0x26, 0xB2, 0x75, 0x8E, 0x66, 0xCF, 0x11] ] }, // ASF header GUID
     };
+    private static readonly Dictionary<string, JobType> ExtensionToJobType = new(StringComparer.OrdinalIgnoreCase)
+    {
+        { ".bmp", JobType.ImageToAscii },
+        { ".png", JobType.ImageToAscii },
+        { ".jpg", JobType.ImageToAscii },
+        { ".jpeg", JobType.ImageToAscii },
+        { ".gif", JobType.ImageToAscii },
+        { ".webp", JobType.ImageToAscii },
 
-    public async Task<bool> IsValidFile(IFormFile file)
+        { ".mp4", JobType.VideoToAscii },
+        { ".mov", JobType.VideoToAscii },
+        { ".avi", JobType.VideoToAscii },
+        { ".webm", JobType.VideoToAscii },
+        { ".mkv", JobType.VideoToAscii },
+        { ".flv", JobType.VideoToAscii },
+        { ".wmv", JobType.VideoToAscii },
+    };
+    public async Task<(bool IsValid, JobType JobKind)> IsValidFile(IFormFile file)
     {
         if (file is null || file.Length <= 0)
-            return false;
+            return (false, JobType.ImageToAscii);
         
         string fileExtension = Path.GetExtension(file.FileName);
         
         if (!AllowedExtensionsAndSignatures.TryGetValue(fileExtension, out var signatures))
-            return false;
+            return (false, JobType.ImageToAscii);
 
         int maxLength = signatures.Max(s => s.Length);
         using var stream = file.OpenReadStream();
         
         byte[] headerBuffer = new byte[maxLength];
         int byteReads = await stream.ReadAsync(headerBuffer.AsMemory(0, maxLength));
-        return signatures.Any(s =>
+        bool isValid =  signatures.Any(s =>
             byteReads >= s.Length &&
             headerBuffer.AsSpan(0, s.Length).SequenceEqual(s));
+        return (isValid, ExtensionToJobType[fileExtension]);
     }
 }

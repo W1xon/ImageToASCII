@@ -1,35 +1,25 @@
 using ImageToASCII.ColorSystem;
 using ImageToASCII.Core.Models;
+using ImageToASCII.Services;
 using ImageToASCII.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImageToASCII.Web.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
-public class ImageController : ControllerBase
+[Route("[controller]")]
+public class MediaController : ControllerBase
 {
     private readonly ConversionQueue _queue;
     private readonly FileSignatureValidator _validator;
     
-    public ImageController(ConversionQueue queue, FileSignatureValidator validator)
+    public MediaController(ConversionQueue queue, FileSignatureValidator validator)
     {
         _validator = validator;
         _queue = queue;
     }
-    [HttpGet]
-    public IActionResult Get()
-    {
-        return Ok(new { message = "hello" });
-    }
-
-    [HttpGet("{id}")]
-    public IActionResult Get(int id)
-    {
-        return Ok(new { id });
-    }
     
-    [HttpGet("save")]
+    [HttpGet("convert")]
     public IActionResult SavePage()
     {
         return PhysicalFile(
@@ -38,14 +28,14 @@ public class ImageController : ControllerBase
     }
     
     [RequestSizeLimit(33554432)]
-    [HttpPost("save")]
+    [HttpPost("convert")]
     public async Task<IActionResult> Save(
         [FromForm] IFormFile file, 
         [FromForm] PaletteType paletteType, 
         [FromForm] int paletteIndex, 
         [FromForm] int width)
     {
-        bool isValid = await _validator.IsValidFile(file);
+        var (isValid, jobKind) = await _validator.IsValidFile(file);
         
         if (!isValid) return BadRequest("Неверный формат файла") ;
         string uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
@@ -68,18 +58,24 @@ public class ImageController : ControllerBase
             PaletteType = paletteType,
             AsciiPalette = AsciiPaletteRegistry.All[paletteIndex]
         };
-        await ConvertImg(filePath, settings);
+        string outputFilePath = jobKind == JobType.ImageToAscii
+            ? new OutputNameBuilder(settings)
+                .BuildImage()
+            : new OutputNameBuilder(settings)
+                .BuildVideo();
+        
+        await ConvertImg(outputFilePath, settings, jobKind);
         string contentType = file.ContentType;
-        return PhysicalFile(filePath, contentType);
+        return PhysicalFile(outputFilePath, contentType);
     }
-    private async Task ConvertImg(string filePath, ConversionSettings settings)
+    private async Task ConvertImg(string filePath, ConversionSettings settings, JobType jobType)
     {
 
         var job = new ConversionJob
         {
-            Type = JobType.ImageToAscii,
+            Type = jobType,
             Settings = settings,
-            OutputPath = $"{filePath}"
+            OutputPath = filePath
         };
 
         await _queue.EnqueueAsync(job);

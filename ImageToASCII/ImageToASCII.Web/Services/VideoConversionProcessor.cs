@@ -1,0 +1,29 @@
+using ImageToASCII.Core;
+using ImageToASCII.ColorSystem;
+using ImageToASCII.Core.Converters;
+using ImageToASCII.Core.Processors;
+using ImageToASCII.Web.Models;
+
+namespace ImageToASCII.Web;
+
+public class VideoConversionProcessor : IConversionProcessor
+{
+    public async Task Process(ConversionJob job, IReporter reporter)
+    {
+        var converter = new BitmapToAsciiConverter(job.Settings.AsciiPalette.Characters.ToArray());
+        var exporter = new AsciiExporter(converter, reporter) { AsciiWidth = job.Settings.Width };
+        
+        var classifier = ColorClassifierFactory
+            .Create(job.Settings.PaletteType);
+        var videoConverter = new VideoToAsciiConverter(exporter, reporter);
+
+        await videoConverter.InitializeAsync();
+
+        reporter.ShowInfo("Начинаем конвертацию видео...");
+
+        await videoConverter.Convert(
+            job.Settings.InputFilePath,
+            job.OutputPath,
+            classifier);
+    }
+}
