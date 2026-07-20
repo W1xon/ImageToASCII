@@ -160,7 +160,14 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
         int w = asciiChars.GetLength(1);
         if (verbose)
             _reporter.ShowInfo($"Размер сетки: {w}x{h} символов");
-        resized.ToGrayscale(colorClassifier);
+        
+        
+        int width = resized.Width;
+        int height = resized.Height;
+        int total = width * height;
+        uint[] colors = new uint[total];
+        Span<uint> colorSpan = colors.AsSpan(0, total);
+        resized.ToGrayscale(colorClassifier, colorSpan);
         int outW = (int)(w * _charWidth);
         int outH = h * fontSize;
         if (verbose)
@@ -175,7 +182,7 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
             AsciiChars = asciiChars,
             OutputWidth = outW,
             OutputHeight = outH,
-            Colors = BitmapExtensions.Colors 
+            Colors = colors
         };
     }
     public void Dispose()

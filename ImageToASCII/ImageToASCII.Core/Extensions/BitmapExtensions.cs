@@ -5,18 +5,13 @@ namespace ImageToASCII.Services;
 
 public static class BitmapExtensions
 {
-    public static uint[] Colors;
 
     private static readonly byte[] GammaLut = BuildGammaLut(0.8f);
 
-    public static unsafe void ToGrayscale(this SKBitmap bitmap, IColorClassifier classifier)
+    public static unsafe void ToGrayscale(this SKBitmap bitmap, IColorClassifier classifier, Span<uint> colorBuffer)
     {
         int width = bitmap.Width;
         int height = bitmap.Height;
-        int total = width * height;
-
-        if (Colors == null || Colors.Length < total)
-            Colors = new uint[total];
 
         IntPtr pixelsAddr = bitmap.GetPixels();
         if (pixelsAddr == IntPtr.Zero)
@@ -24,13 +19,13 @@ public static class BitmapExtensions
 
         byte* ptr = (byte*)pixelsAddr;
 
-        ProcessBGRA(ptr, width, height, bitmap.RowBytes, classifier);
+        ProcessBGRA(ptr, width, height, bitmap.RowBytes, classifier,colorBuffer);
 
         bitmap.NotifyPixelsChanged();
     }
 
     private static unsafe void ProcessBGRA(
-        byte* ptr, int width, int height, int rowBytes, IColorClassifier classifier)
+        byte* ptr, int width, int height, int rowBytes, IColorClassifier classifier, Span<uint> colorBuffer)
     {
         int idx = 0;
 
@@ -46,7 +41,7 @@ public static class BitmapExtensions
                 byte g = p[1];
                 byte r = p[2];
 
-                Colors[idx] = classifier.GetColor(r, g, b);
+                colorBuffer[idx] = classifier.GetColor(r, g, b);
 
                 int grayInt = (r * 77 + g * 150 + b * 29) >> 8;
                 byte finalGray = GammaLut[grayInt];
