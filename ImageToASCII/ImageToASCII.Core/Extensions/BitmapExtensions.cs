@@ -3,9 +3,9 @@ using ImageToASCII.ColorSystem;
 
 namespace ImageToASCII.Services;
 
+
 public static class BitmapExtensions
 {
-
     private static readonly byte[] GammaLut = BuildGammaLut(0.8f);
 
     public static unsafe void ToGrayscale(this SKBitmap bitmap, IColorClassifier classifier, Span<uint> colorBuffer)
@@ -24,11 +24,9 @@ public static class BitmapExtensions
         bitmap.NotifyPixelsChanged();
     }
 
-    private static unsafe void ProcessBGRA(
-        byte* ptr, int width, int height, int rowBytes, IColorClassifier classifier, Span<uint> colorBuffer)
+    private static unsafe void ProcessBGRA(byte* ptr, int width, int height, int rowBytes, IColorClassifier classifier, Span<uint> colorBuffer)
     {
         int idx = 0;
-
         for (int y = 0; y < height; y++)
         {
             byte* row = ptr + y * rowBytes;
@@ -36,7 +34,6 @@ public static class BitmapExtensions
             for (int x = 0; x < width; x++)
             {
                 byte* p = row + x * 4;
-
                 byte b = p[0];
                 byte g = p[1];
                 byte r = p[2];

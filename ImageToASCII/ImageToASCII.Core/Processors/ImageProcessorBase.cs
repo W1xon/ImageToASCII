@@ -21,25 +21,12 @@ public abstract class ImageProcessorBase
         double imageRatio = bitmap.Width / (double)bitmap.Height;
 
         int targetWidth = AsciiWidth;
-        
         int targetHeight = (int)((targetWidth / imageRatio) * fontAspectRatio);
 
         if (targetHeight <= 0) targetHeight = 1;
 
-        var resized = new SKBitmap(targetWidth, targetHeight);
+        var info = new SKImageInfo(targetWidth, targetHeight, bitmap.ColorType, bitmap.AlphaType);
         
-        using (var canvas = new SKCanvas(resized))
-        using (var paint = new SKPaint())
-        {
-            paint.FilterQuality = SKFilterQuality.High;
-            paint.IsAntialias = true;
-            
-            canvas.Clear(SKColors.Transparent);
-            canvas.DrawBitmap(bitmap, 
-                new SKRect(0, 0, targetWidth, targetHeight), 
-                paint);
-        }
-        
-        return resized;
+        return bitmap.Resize(info, SKFilterQuality.Low);
     }
 }

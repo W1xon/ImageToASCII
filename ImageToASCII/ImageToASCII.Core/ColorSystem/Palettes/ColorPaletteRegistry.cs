@@ -4,7 +4,7 @@ namespace ImageToASCII.ColorSystem;
 
 public static class ColorPaletteRegistry
 {
-    public static IReadOnlyList<SKColor> Basic16 { get; } =
+    public static SKColor[] Basic16 { get; } =
     [
         new(0, 0, 0),
         new(0, 0, 128),
@@ -24,7 +24,7 @@ public static class ColorPaletteRegistry
         new(255, 255, 255)
     ];
 
-    public static IReadOnlyList<SKColor> Basic7 { get; } =
+    public static SKColor[] Basic7 { get; } =
     [
         new(255, 0, 0),
         new(0, 255, 0),

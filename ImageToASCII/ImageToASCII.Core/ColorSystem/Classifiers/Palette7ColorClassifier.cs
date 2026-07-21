@@ -3,6 +3,6 @@
 namespace ImageToASCII.ColorSystem;
 public sealed class Palette7ColorClassifier : PaletteColorClassifierBase
 {
-    protected override IReadOnlyList<SKColor> Palette
+    protected override SKColor[] Palette
         => ColorPaletteRegistry.Basic7;
 }
