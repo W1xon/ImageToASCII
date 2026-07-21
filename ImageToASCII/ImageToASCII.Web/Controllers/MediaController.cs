@@ -66,7 +66,22 @@ public class MediaController : ControllerBase
         
         await ConvertImg(outputFilePath, settings, jobKind);
         string contentType = file.ContentType;
-        return PhysicalFile(outputFilePath, contentType);
+        try
+        {
+              var stream = new FileStream(
+                outputFilePath,FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read | FileShare.Delete,
+                4096,
+                FileOptions.DeleteOnClose);
+            
+            return File(stream, contentType);
+        }
+        finally
+        {
+            if (System.IO.File.Exists(filePath))
+                System.IO.File.Delete(filePath);
+        }
     }
     private async Task ConvertImg(string filePath, ConversionSettings settings, JobType jobType)
     {
