@@ -153,7 +153,7 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
             _reporter.ShowInfo($"Оригинал: {bitmap.Width}x{bitmap.Height}px");
         }
         float fontAspectRatio = _charWidth / (float)fontSize;
-        var resized = ResizeBitmap(bitmap, fontAspectRatio);
+        using var resized = ResizeBitmap(bitmap, fontAspectRatio);
         
         var asciiChars = _asciiConverter.Convert(resized);
         int h = asciiChars.GetLength(0);
@@ -178,7 +178,6 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
         }
         return new AsciiPrepareResult
         {
-            ResizedBitmap = resized,
             AsciiChars = asciiChars,
             OutputWidth = outW,
             OutputHeight = outH,

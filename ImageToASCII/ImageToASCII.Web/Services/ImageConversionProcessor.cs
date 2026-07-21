@@ -12,7 +12,7 @@ public class ImageConversionProcessor : IConversionProcessor
     public async Task Process(ConversionJob job, IReporter reporter)
     {
         var converter = new BitmapToAsciiConverter(job.Settings.AsciiPalette.Characters.ToArray());
-        var exporter = new AsciiExporter(converter, reporter) { AsciiWidth = job.Settings.Width };
+        using var exporter = new AsciiExporter(converter, reporter) { AsciiWidth = job.Settings.Width };
 
         using var sourceBitmap = SKBitmap.Decode(job.Settings.InputFilePath);
         var classifier = ColorClassifierFactory.Create(job.Settings.PaletteType);

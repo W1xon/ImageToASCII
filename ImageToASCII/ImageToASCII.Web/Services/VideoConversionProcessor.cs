@@ -3,6 +3,7 @@ using ImageToASCII.ColorSystem;
 using ImageToASCII.Core.Converters;
 using ImageToASCII.Core.Processors;
 using ImageToASCII.Web.Models;
+using SkiaSharp;
 
 namespace ImageToASCII.Web;
 
@@ -11,7 +12,7 @@ public class VideoConversionProcessor : IConversionProcessor
     public async Task Process(ConversionJob job, IReporter reporter)
     {
         var converter = new BitmapToAsciiConverter(job.Settings.AsciiPalette.Characters.ToArray());
-        var exporter = new AsciiExporter(converter, reporter) { AsciiWidth = job.Settings.Width };
+        using var exporter = new AsciiExporter(converter, reporter) { AsciiWidth = job.Settings.Width };
         
         var classifier = ColorClassifierFactory
             .Create(job.Settings.PaletteType);
