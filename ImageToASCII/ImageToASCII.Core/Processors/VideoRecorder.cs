@@ -3,9 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using ImageToASCII.Services;
 using SkiaSharp;
-
 namespace ImageToASCII.Core.Processors;
-
 public class VideoRecorder : IDisposable
 {
     private readonly int _fps;
@@ -18,7 +16,6 @@ public class VideoRecorder : IDisposable
     private byte[]? _writeBuffer;
     private int _writeBufferSize;
     private bool _writeBufferFromPool;
-
     private static string FfmpegExe  => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffmpeg.exe"  : "ffmpeg";
     private static string FfprobeExe => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffprobe.exe" : "ffprobe";
     private IReporter _reporter;
@@ -29,11 +26,9 @@ public class VideoRecorder : IDisposable
         _reporter = reporter;
         _fps = fps;
     }
-
     public async Task<bool> InitializeFFmpegAsync()
     {
         if (_isFFmpegReady) return true;
-
         string ffmpegDir = Path.Combine(AppContext.BaseDirectory, "ffmpeg");
         bool ok = await _fFmpegBootstrapper.EnsureFFmpegAsync(ffmpegDir);
         if (!ok)
@@ -42,20 +37,16 @@ public class VideoRecorder : IDisposable
             _isFFmpegReady = false;
             return false;
         }
-
         _isFFmpegReady = true;
         return true;
     }
-
     public async IAsyncEnumerable<SKBitmap> ExtractFramesStream(string inputFile, int fps = 30)
     {
         if (!_isFFmpegReady)
             throw new InvalidOperationException("FFmpeg не инициализирован");
-
         string ffmpegDir  = _fFmpegBootstrapper.GetFFmpegPath();
         string ffprobePath = Path.Combine(ffmpegDir, FfprobeExe); 
         string ffmpegPath  = Path.Combine(ffmpegDir, FfmpegExe);  
-
         var probe = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -68,22 +59,17 @@ public class VideoRecorder : IDisposable
                 CreateNoWindow = true
             }
         };
-
         probe.Start();
         string output = await probe.StandardOutput.ReadToEndAsync();
         await probe.WaitForExitAsync();
-
         var dims = output
             .Split('\n', StringSplitOptions.RemoveEmptyEntries)
             .Select(l => l.Trim().Split(','))
             .FirstOrDefault(parts => parts.Length == 2 && parts.All(p => int.TryParse(p, out _)));
-
         if (dims == null)
             throw new Exception($"Не удалось получить размеры видео. Вывод ffprobe: '{output}'");
-
         int width  = int.Parse(dims[0]);
         int height = int.Parse(dims[1]);
-
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -96,14 +82,11 @@ public class VideoRecorder : IDisposable
                 CreateNoWindow = true
             }
         };
-
         process.Start();
         ConsumeStreamErrors(process.StandardError);
-
         int frameSize = width * height * 4;
         byte[] buffer = new byte[frameSize];
         var stdout = process.StandardOutput.BaseStream;
-
         try
         {
             while (true)
@@ -115,7 +98,6 @@ public class VideoRecorder : IDisposable
                     if (read == 0) yield break;
                     totalRead += read;
                 }
-
                 var bitmap = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Unpremul);
                 Marshal.Copy(buffer, 0, bitmap.GetPixels(), buffer.Length);
                 bitmap.NotifyPixelsChanged();
@@ -128,53 +110,41 @@ public class VideoRecorder : IDisposable
             process.Dispose();
         }
     }
-
     public void StartRecording(string outputPath, int width, int height)
     {
         if (_isRecordingStarted) return;
-
         string? outputDir = Path.GetDirectoryName(outputPath);
         if (!string.IsNullOrEmpty(outputDir) && !Directory.Exists(outputDir))
             Directory.CreateDirectory(outputDir);
-
         _targetWidth  = width  % 2 == 0 ? width  : width  - 1;
         _targetHeight = height % 2 == 0 ? height : height - 1;
-
         _reporter.ShowInfo($"Запись: {_targetWidth}x{_targetHeight} @ {_fps} FPS");
-
         string ffmpegDir = _fFmpegBootstrapper.GetFFmpegPath();
         string ffmpegPath = Path.Combine(ffmpegDir, FfmpegExe);
-
         _outputProcess = new Process
         {
             StartInfo = new ProcessStartInfo
             {
                 FileName = ffmpegPath,
                 Arguments = $"-y -loglevel error -f rawvideo -pix_fmt rgba -s {_targetWidth}x{_targetHeight} -r {_fps} " +
-                            $"-i pipe:0 -c:v libx264 -crf 17 -preset medium -tune grain -pix_fmt yuv420p " +
-                            $"-x264-params \"no-deblock=1:aq-mode=2:merange=16\" \"{outputPath}\"",
+                            $"-i pipe:0 -c:v libx264 -crf 23 -preset veryfast -pix_fmt yuv420p \"{outputPath}\"",
                 UseShellExecute = false,
                 RedirectStandardInput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true
             }
         };
-
         _outputProcess.Start();
         _inputStreamOfOutputProcess = _outputProcess.StandardInput.BaseStream;
         _isRecordingStarted = true;
-
         ConsumeStreamErrors(_outputProcess.StandardError);
     }
-
     public async Task WriteFrameAsync(SKBitmap frame)
     {
         if (!_isRecordingStarted || _inputStreamOfOutputProcess == null || _outputProcess!.HasExited)
             throw new InvalidOperationException("FFmpeg процесс записи не активен");
-
         SKBitmap toWrite = frame;
         bool needsDispose = false;
-
         if (frame.ColorType != SKColorType.Rgba8888)
         {
             toWrite = new SKBitmap(frame.Width, frame.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul);
@@ -182,7 +152,6 @@ public class VideoRecorder : IDisposable
             canvas.DrawBitmap(frame, 0, 0);
             needsDispose = true;
         }
-
         if (toWrite.Width != _targetWidth || toWrite.Height != _targetHeight)
         {
             var resized = toWrite.Resize(new SKImageInfo(_targetWidth, _targetHeight, SKColorType.Rgba8888, SKAlphaType.Unpremul), SKFilterQuality.Low);
@@ -190,22 +159,18 @@ public class VideoRecorder : IDisposable
             toWrite = resized;
             needsDispose = true;
         }
-
         try
         {
             var pixels = toWrite.GetPixels();
             int bytesCount = _targetWidth * _targetHeight * 4;
-
             if (_writeBuffer == null || _writeBufferSize < bytesCount)
             {
                 if (_writeBuffer != null && _writeBufferFromPool)
                     ArrayPool<byte>.Shared.Return(_writeBuffer, false);
-
                 _writeBuffer = ArrayPool<byte>.Shared.Rent(bytesCount);
                 _writeBufferSize = _writeBuffer.Length;
                 _writeBufferFromPool = true;
             }
-
             Marshal.Copy(pixels, _writeBuffer, 0, bytesCount);
             await _inputStreamOfOutputProcess.WriteAsync(new ReadOnlyMemory<byte>(_writeBuffer, 0, bytesCount));
             await _inputStreamOfOutputProcess.FlushAsync();
@@ -215,11 +180,9 @@ public class VideoRecorder : IDisposable
             if (needsDispose) toWrite.Dispose();
         }
     }
-
     public async Task StopRecordingAsync()
     {
         if (!_isRecordingStarted || _outputProcess == null) return;
-
         try
         {
             _inputStreamOfOutputProcess?.Close();
@@ -245,26 +208,20 @@ public class VideoRecorder : IDisposable
             _inputStreamOfOutputProcess = null;
         }
     }
-
     public void MergeAudio(string audioSource, string videoSource)
     {
         string outputVideo = Path.Combine(
             Path.GetDirectoryName(videoSource)!,
             Path.GetFileNameWithoutExtension(videoSource) + "_audio" + Path.GetExtension(videoSource)
         );
-
         _reporter.ShowInfo("Слияние аудио с видео");
-
         string args = $"-i \"{audioSource}\" -i \"{videoSource}\" -c:v copy -map 0:a -map 1:v -shortest \"{outputVideo}\" -y";
-
         string ffmpegDir = _fFmpegBootstrapper.GetFFmpegPath();
         string ffmpegPath = Path.Combine(ffmpegDir, FfmpegExe);
-
         using var process = new Process { StartInfo = new ProcessStartInfo(ffmpegPath, args) { UseShellExecute = false, CreateNoWindow = true }, EnableRaisingEvents = true };
         _reporter.ShowInfo("Склейка аудио...");
         process.Start();
         process.WaitForExit();
-
         if (process.ExitCode == 0 && File.Exists(outputVideo))
         {
             File.Delete(videoSource);
@@ -276,7 +233,6 @@ public class VideoRecorder : IDisposable
             _reporter.ShowError($"Ошибка FFmpeg (код {process.ExitCode})");
         }
     }
-
     private void ConsumeStreamErrors(StreamReader reader)
     {
         Task.Run(async () =>
@@ -293,7 +249,6 @@ public class VideoRecorder : IDisposable
             catch { }
         });
     }
-
     public void Dispose()
     {
         if (_isRecordingStarted)
@@ -306,7 +261,6 @@ public class VideoRecorder : IDisposable
             }
             catch { }
         }
-
         if (_writeBuffer != null && _writeBufferFromPool)
         {
             ArrayPool<byte>.Shared.Return(_writeBuffer, false);

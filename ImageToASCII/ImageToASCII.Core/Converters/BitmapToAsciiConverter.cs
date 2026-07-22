@@ -6,7 +6,7 @@ public sealed class BitmapToAsciiConverter
 {
     private readonly char[] _asciiTable;
     private char[,]? _buffer;
-
+    public IReadOnlyList<char> Table => _asciiTable;
     public BitmapToAsciiConverter(char[] asciiTable)
     {
         if (asciiTable == null || asciiTable.Length == 0)

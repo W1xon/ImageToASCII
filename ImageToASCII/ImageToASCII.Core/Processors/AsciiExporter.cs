@@ -14,6 +14,7 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
     private IReporter _reporter;
     private GlyphMaskCache? _maskCache;
     private float _maskCacheFontSize = -1;
+    private char[]? _warmedPaletteChars;
     public AsciiExporter(BitmapToAsciiConverter converter, IReporter reporter) : base(converter)
     {
         _reporter = reporter;
@@ -55,7 +56,7 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
 
     private SKBitmap RenderCoreOptimized(AsciiPrepareResult data, int fontSize)
     {
-        EnsureMaskCache(fontSize, data.AsciiChars);
+        EnsureMaskCache(fontSize, _asciiConverter.Table);
 
         return FastGlyphRenderer.Render(
             data.AsciiChars,
@@ -69,7 +70,7 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
 
     private SKBitmap RenderCoreWithProgress(AsciiPrepareResult data, int fontSize)
     {
-        EnsureMaskCache(fontSize, data.AsciiChars);
+        EnsureMaskCache(fontSize, _asciiConverter.Table);
 
         var chars = data.AsciiChars;
         int h = chars.GetLength(0);
@@ -94,25 +95,22 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
         return output;
     }
 
-    private void EnsureMaskCache(int fontSize, char[,] chars)
+    private void EnsureMaskCache(int fontSize, IReadOnlyList<char> paletteChars)
     {
-        GetOrCreatePaint(fontSize);
-
-        if (_maskCache == null || Math.Abs(_maskCacheFontSize - fontSize) > 0.01f)
+        bool needNewCache = _maskCache == null || Math.Abs(_maskCacheFontSize - fontSize) > 0.01f;
+        if (needNewCache)
         {
             _maskCache?.Dispose();
             _maskCache = new GlyphMaskCache(_typeface, fontSize, _charWidth);
             _maskCacheFontSize = fontSize;
+            _warmedPaletteChars = null;
         }
 
-        var uniqueChars = new HashSet<char>();
-        int h = chars.GetLength(0);
-        int w = chars.GetLength(1);
-        for (int y = 0; y < h; y++)
-            for (int x = 0; x < w; x++)
-                uniqueChars.Add(chars[y, x]);
-
-        _maskCache.Warmup(uniqueChars);
+        if (_warmedPaletteChars == null || !paletteChars.SequenceEqual(_warmedPaletteChars))
+        {
+            _maskCache.Warmup(new HashSet<char>(paletteChars));
+            _warmedPaletteChars = paletteChars.ToArray();
+        }
     }
 
     private SKPaint GetOrCreatePaint(int fontSize)
@@ -135,17 +133,9 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
         }
         return _textPaint;
     }
-    private string GetCachedString(char c)
-    {
-        if (_stringCache.TryGetValue(c, out var s)) return s;
-        
-        s = c.ToString();
-        _stringCache[c] = s;
-        return s;
-    }
     private AsciiPrepareResult PrepareInternal(SKBitmap bitmap, IColorClassifier colorClassifier, int fontSize, bool verbose)
     {
-        var paint = GetOrCreatePaint(fontSize);
+        GetOrCreatePaint(fontSize);
         if (verbose)
         {
             Console.WriteLine();
@@ -168,14 +158,19 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
         uint[] colors = new uint[total];
         Span<uint> colorSpan = colors.AsSpan(0, total);
         resized.ToGrayscale(colorClassifier, colorSpan);
+        
         int outW = (int)(w * _charWidth);
         int outH = h * fontSize;
+        if (outW % 2 != 0) outW--;
+        if (outH % 2 != 0) outH--;
+        
         if (verbose)
         {
             _reporter.ShowInfo($"Ширина символа: {_charWidth:F2}px, Высота: {fontSize}px");
             _reporter.ShowInfo($"Финальный холст: {outW}x{outH}px");
             Console.WriteLine();
         }
+        
         return new AsciiPrepareResult
         {
             AsciiChars = asciiChars,
