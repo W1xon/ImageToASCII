@@ -185,7 +185,7 @@ public class VideoRecorder : IDisposable
 
         if (toWrite.Width != _targetWidth || toWrite.Height != _targetHeight)
         {
-            var resized = toWrite.Resize(new SKImageInfo(_targetWidth, _targetHeight, SKColorType.Rgba8888, SKAlphaType.Unpremul), SKFilterQuality.High);
+            var resized = toWrite.Resize(new SKImageInfo(_targetWidth, _targetHeight, SKColorType.Rgba8888, SKAlphaType.Unpremul), SKFilterQuality.Low);
             if (needsDispose) toWrite.Dispose();
             toWrite = resized;
             needsDispose = true;

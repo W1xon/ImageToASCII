@@ -25,8 +25,8 @@ public abstract class ImageProcessorBase
 
         if (targetHeight <= 0) targetHeight = 1;
 
-        var info = new SKImageInfo(targetWidth, targetHeight, bitmap.ColorType, bitmap.AlphaType);
-        
+        var info = new SKImageInfo(targetWidth, targetHeight, SKColorType.Bgra8888, SKAlphaType.Premul);
+
         return bitmap.Resize(info, SKFilterQuality.Low);
     }
 }
