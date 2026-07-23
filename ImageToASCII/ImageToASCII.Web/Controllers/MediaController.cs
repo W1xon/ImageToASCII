@@ -85,7 +85,6 @@ public class MediaController : ControllerBase
     }
     private async Task ConvertImg(string filePath, ConversionSettings settings, JobType jobType)
     {
-
         var job = new ConversionJob
         {
             Type = jobType,

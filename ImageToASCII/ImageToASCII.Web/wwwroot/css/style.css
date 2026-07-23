@@ -28,8 +28,8 @@
     --font-sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-    --radius: 10px;
-    --radius-lg: 16px;
+    --radius: 12px;
+    --radius-lg: 20px;
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08);
@@ -87,6 +87,7 @@
 
 html {
     background: var(--bg);
+    font-size: clamp(13px, 1.1vw, 28px);
 }
 
 body {
@@ -96,16 +97,23 @@ body {
     color: var(--text-primary);
     font-family: var(--font-sans);
     line-height: 1.5;
-    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .page {
-    max-width: 640px;
+    width: 100%;
+    max-width: 94vw;
     margin: 0 auto;
-    padding: 64px 24px 80px;
+    padding: clamp(1rem, 2vw, 2.5rem);
     position: relative;
     z-index: 1;
-    transition: max-width 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 /* --- Header / brand --- */
@@ -113,11 +121,11 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 32px;
+    margin-bottom: 1.5rem;
 }
 
 .brand-name {
-    font-size: 14px;
+    font-size: 0.95rem;
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -126,10 +134,10 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 12px;
+    font-size: 0.8rem;
     color: var(--success-text);
     background: var(--success-bg);
-    padding: 4px 10px;
+    padding: 0.3rem 0.75rem;
     border-radius: 100px;
     margin-left: auto;
     font-weight: 500;
@@ -154,23 +162,24 @@ body {
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
-    padding: 40px;
+    padding: clamp(1.2rem, 2.5vw, 2.5rem);
+    width: 100%;
 }
 
 /* --- Typography --- */
 h1 {
-    font-size: 28px;
+    font-size: clamp(1.3rem, 1.8vw, 2.2rem);
     font-weight: 700;
     letter-spacing: -0.02em;
-    margin: 0 0 10px;
+    margin: 0 0 0.5rem;
     color: var(--text-primary);
 }
 
 .subtitle {
     color: var(--text-secondary);
-    font-size: 15px;
-    line-height: 1.6;
-    margin: 0 0 28px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 1.5rem;
 }
 
 /* --- Route tag --- */
@@ -181,11 +190,11 @@ h1 {
     background: var(--surface-muted);
     border: 1px solid var(--border);
     color: var(--text-primary);
-    font-size: 13px;
+    font-size: 0.85rem;
     font-family: var(--font-mono);
-    padding: 8px 14px;
+    padding: 0.5rem 0.9rem;
     border-radius: 8px;
-    margin: 0 0 28px;
+    margin: 0 0 1.5rem;
 }
 
 .route-tag .method {
@@ -194,47 +203,20 @@ h1 {
     background: var(--accent);
     padding: 2px 8px;
     border-radius: 5px;
-    font-size: 11px;
+    font-size: 0.75rem;
     letter-spacing: 0.03em;
-}
-
-/* --- Feature list --- */
-.feature-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.feature-list li {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-size: 14px;
-    color: var(--text-secondary);
-}
-
-.feature-list li::before {
-    content: "";
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--accent);
-    margin-top: 8px;
-    flex-shrink: 0;
 }
 
 /* --- Buttons --- */
 .btn-container {
     display: flex;
     justify-content: center;
-    margin-top: 16px;
+    margin-top: 1rem;
 }
 
 .form-submit-container {
     text-align: center;
+    margin-top: 1.25rem;
 }
 
 .btn {
@@ -246,14 +228,14 @@ h1 {
     color: #fff;
     font-family: var(--font-sans);
     font-weight: 600;
-    font-size: 14px;
-    padding: 0 28px;
+    font-size: 0.9rem;
+    padding: 0 1.5rem;
     border: none;
     border-radius: 10px;
     cursor: pointer;
     text-decoration: none;
-    height: 46px;
-    min-width: 200px;
+    min-height: 2.8rem;
+    width: 100%;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02);
     transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -277,6 +259,7 @@ h1 {
     background: transparent;
     color: var(--text-secondary);
     border: 1px solid var(--border);
+    width: auto;
 }
 
 .btn-ghost:hover {
@@ -304,9 +287,9 @@ h1 {
 }
 
 .btn-sm {
-    height: 38px;
-    padding: 0 16px;
-    font-size: 13px;
+    min-height: 2.2rem;
+    padding: 0 1rem;
+    font-size: 0.85rem;
     border-radius: 7px;
 }
 
@@ -319,33 +302,32 @@ h1 {
 #uploadForm {
     display: flex;
     flex-direction: column;
-    flex: 1;
+    height: 100%;
     justify-content: space-between;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 22px;
-    margin-bottom: 28px;
+    gap: 1rem;
 }
 
 .field {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 0.4rem;
 }
 
 .field label {
-    font-size: 13px;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-primary);
 }
 
 .field-hint {
-    font-size: 12px;
+    font-size: 0.75rem;
     color: var(--text-muted);
-    margin-top: -4px;
+    margin-top: -0.2rem;
 }
 
 .field input[type="text"],
@@ -354,11 +336,11 @@ h1 {
     border: 1px solid var(--border);
     color: var(--text-primary);
     font-family: var(--font-sans);
-    font-size: 14px;
-    height: 46px;
+    font-size: 0.9rem;
+    height: 2.7rem;
     border-radius: 8px;
     width: 100%;
-    padding: 0 14px;
+    padding: 0 0.8rem;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -370,17 +352,17 @@ h1 {
     border: 1px solid var(--border);
     color: var(--text-primary);
     font-family: var(--font-sans);
-    font-size: 14px;
-    height: 46px;
+    font-size: 0.9rem;
+    height: 2.7rem;
     border-radius: 8px;
     width: 100%;
     cursor: pointer;
-    padding: 0 40px 0 14px;
+    padding: 0 2.2rem 0 0.8rem;
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b6b66' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
     background-repeat: no-repeat;
-    background-size: 16px;
-    background-position: calc(100% - 14px) center;
+    background-size: 1rem;
+    background-position: calc(100% - 0.8rem) center;
 }
 
 .field select option {
@@ -402,8 +384,8 @@ h1 {
 
 .field-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.8rem;
 }
 
 /* --- File drop zone --- */
@@ -411,11 +393,11 @@ h1 {
     border: 1.5px dashed var(--border-strong);
     background: var(--surface-muted);
     border-radius: 10px;
-    padding: 32px 20px;
+    padding: clamp(0.8rem, 1.5vw, 1.5rem) 0.8rem;
     text-align: center;
     cursor: pointer;
     color: var(--text-secondary);
-    font-size: 14px;
+    font-size: 0.85rem;
     transition: border-color 0.15s ease, background 0.15s ease;
     position: relative;
     display: block;
@@ -430,10 +412,29 @@ h1 {
 
 .file-drop-icon {
     display: block;
-    width: 28px;
-    height: 28px;
-    margin: 0 auto 12px;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: 0 auto 0.5rem;
     color: var(--text-muted);
+}
+
+.file-preview {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: clamp(90px, 12vh, 160px);
+    margin-bottom: 0.4rem;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.file-preview img,
+.file-preview video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 6px;
 }
 
 .bg-canvas {
@@ -453,8 +454,8 @@ h1 {
 }
 
 .bg-blob-1 {
-    width: 420px;
-    height: 420px;
+    width: clamp(300px, 35vw, 800px);
+    height: clamp(300px, 35vw, 800px);
     background: var(--accent);
     top: -10%;
     left: -8%;
@@ -462,8 +463,8 @@ h1 {
 }
 
 .bg-blob-2 {
-    width: 320px;
-    height: 320px;
+    width: clamp(250px, 30vw, 700px);
+    height: clamp(250px, 30vw, 700px);
     background: var(--accent);
     opacity: 0.12;
     bottom: -12%;
@@ -494,26 +495,28 @@ h1 {
 
 .file-drop .file-name {
     display: block;
-    margin-top: 8px;
+    margin-top: 0.4rem;
     color: var(--accent);
-    font-size: 13px;
+    font-size: 0.8rem;
     word-break: break-all;
     font-weight: 600;
 }
 
 /* --- Result media & placeholder --- */
 #imageContainer {
-    margin-top: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    justify-content: center;
     width: 100%;
+    flex: 1;
+    min-height: clamp(200px, 25vh, 450px);
 }
 
 .preview-placeholder {
     width: 100%;
-    min-height: 280px;
+    height: 100%;
+    min-height: clamp(200px, 25vh, 450px);
     border: 1.5px dashed var(--border);
     border-radius: 10px;
     background: var(--surface-muted);
@@ -521,9 +524,9 @@ h1 {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    gap: 0.5rem;
     color: var(--text-muted);
-    font-size: 13px;
+    font-size: 0.85rem;
     font-weight: 500;
 }
 
@@ -533,20 +536,23 @@ h1 {
 
 #downloadContainer {
     display: none;
-    margin-top: 16px;
+    margin-top: 1rem;
+    width: 100%;
 }
 
 #resultImage,
 #resultVideo {
-    max-width: 100%;
-    max-height: 70vh;
-    width: auto;
+    display: none;
+    width: 100%;
+    height: 100%;
+    min-width: 180px;
+    min-height: 180px;
+    max-height: clamp(250px, 45vh, 600px);
     object-fit: contain;
     border-radius: 10px;
     border: 1px solid var(--border);
     background: var(--surface-muted);
     box-shadow: var(--shadow-md);
-    display: none;
 }
 
 #resultVideo {
@@ -555,11 +561,10 @@ h1 {
 
 /* --- Status panel --- */
 #resultStatus {
-    font-size: 13px;
-    padding: 12px 16px;
+    font-size: 0.85rem;
+    padding: 0.6rem 0.9rem;
     border-radius: 8px;
-    margin-top: 20px;
-    margin-bottom: 4px;
+    margin-bottom: 0.8rem;
     display: none;
     font-weight: 600;
 }
@@ -593,8 +598,8 @@ h1 {
 }
 
 .spinner {
-    width: 14px;
-    height: 14px;
+    width: 0.85rem;
+    height: 0.85rem;
     border: 2px solid currentColor;
     border-right-color: transparent;
     border-radius: 50%;
@@ -608,90 +613,47 @@ h1 {
 
 /* --- Footer --- */
 .footnote {
-    margin-top: 32px;
-    font-size: 13px;
+    margin-top: 1.25rem;
+    font-size: 0.8rem;
     color: var(--text-muted);
     text-align: center;
 }
 
-/* --- Mobile Responsive --- */
-@media (max-width: 600px) {
-    .page {
-        padding: 32px 16px 60px;
-    }
-    .card {
-        padding: 28px 22px;
-    }
-    h1 {
-        font-size: 22px;
-    }
-    .field-row {
-        grid-template-columns: 1fr;
-        gap: 22px;
-    }
-}
-
 /* --- Desktop Layout (2 Columns) --- */
-@media (min-width: 900px) {
-    .page {
-        max-width: 640px;
-    }
-
-    .page:has(.card-two-cols) {
-        max-width: 1100px;
-    }
-
+@media (min-width: 768px) {
     .card-two-cols {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 40px;
+        gap: clamp(1.2rem, 2.5vw, 3rem);
         align-items: stretch;
     }
 
     .card-left {
         display: flex;
         flex-direction: column;
-        height: 100%;
+        justify-content: space-between;
     }
 
     .card-left > div {
         display: flex;
         flex-direction: column;
         height: 100%;
+        justify-content: space-between;
     }
 
     .card-right {
         display: flex;
         flex-direction: column;
         height: 100%;
-        min-height: 380px;
         justify-content: space-between;
     }
 
     #imageContainer {
         margin-top: 0;
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-    }
-
-    .preview-placeholder {
-        height: 100%;
-        min-height: 320px;
-    }
-
-    #resultImage,
-    #resultVideo {
-        max-height: 480px;
-        width: 100%;
-        object-fit: contain;
     }
 
     #resultStatus {
         margin-top: 0;
-        margin-bottom: 16px;
     }
 }
 
