@@ -4,12 +4,12 @@ using ImageToASCII.Web.Models;
 
 namespace ImageToASCII.Web;
 
-public class ConversionImageWorker : BackgroundService
+public class MediaConversionWorker : BackgroundService
 {
     private ConversionQueue _queue;
     private IReporter _reporter;
     private int _maxParallelJob = Environment.ProcessorCount;
-    public ConversionImageWorker(ConversionQueue queue, IReporter reporter)
+    public MediaConversionWorker(ConversionQueue queue, IReporter reporter)
     {
         _queue = queue;
         _reporter = reporter;
@@ -22,15 +22,13 @@ public class ConversionImageWorker : BackgroundService
         {
             workers[i] = StartWorkerAsync(stoppingToken);
         }
-
         await Task.WhenAll(workers);
     }
-
     private async Task StartWorkerAsync(CancellationToken stoppingToken)
     {
         try
         {
-            await foreach (var job in _queue.ConversionChannel.Reader.ReadAllAsync())
+            await foreach (var job in _queue.ConversionChannel.Reader.ReadAllAsync(stoppingToken))
             {
                 await Task.Run(async () => await ProcessJob(job), stoppingToken) ;
             }
@@ -47,22 +45,20 @@ public class ConversionImageWorker : BackgroundService
     
         try
         {
+            job.Status = JobStatus.Processing;
             var processor = ConversionProcessorFactory.Create(job.Type);
         
             await processor.Process(job, _reporter);
         
             stopwatch.Stop();
-        
+            job.MarkAsCompleted(TimeSpan.FromSeconds(30));
             Console.WriteLine($"[Job {job.Id}] Успешно обработан за {stopwatch.ElapsedMilliseconds} мс (или {stopwatch.Elapsed.TotalSeconds:F2} сек)");
-        
-            job.CompletionSource.SetResult();
         }
         catch (Exception ex)
         {
             stopwatch.Stop(); 
+            job.Status = JobStatus.Failed;
             Console.WriteLine($"[Job {job.Id}] Ошибка через {stopwatch.ElapsedMilliseconds} мс: {ex.Message}");
-        
-            job.CompletionSource.SetException(ex);
         }
     }
 }

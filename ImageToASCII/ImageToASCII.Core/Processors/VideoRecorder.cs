@@ -63,13 +63,16 @@ public class VideoRecorder : IDisposable
         string output = await probe.StandardOutput.ReadToEndAsync();
         await probe.WaitForExitAsync();
         var dims = output
-            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
-            .Select(l => l.Trim().Split(','))
-            .FirstOrDefault(parts => parts.Length == 2 && parts.All(p => int.TryParse(p, out _)));
+            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(line => line.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .Select(parts => parts.Where(p => int.TryParse(p, out _)).Select(int.Parse).ToArray())
+            .FirstOrDefault(parsedInts => parsedInts.Length >= 2);
+
         if (dims == null)
             throw new Exception($"Не удалось получить размеры видео. Вывод ffprobe: '{output}'");
-        int width  = int.Parse(dims[0]);
-        int height = int.Parse(dims[1]);
+
+        int width = dims[0];
+        int height = dims[1];
         var process = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -215,13 +218,30 @@ public class VideoRecorder : IDisposable
             Path.GetFileNameWithoutExtension(videoSource) + "_audio" + Path.GetExtension(videoSource)
         );
         _reporter.ShowInfo("Слияние аудио с видео");
-        string args = $"-i \"{audioSource}\" -i \"{videoSource}\" -c:v copy -map 0:a -map 1:v -shortest \"{outputVideo}\" -y";
+
+        string args = $"-i \"{audioSource}\" -i \"{videoSource}\" -c:v copy -map 0:a? -map 1:v? -shortest \"{outputVideo}\" -y";
+
         string ffmpegDir = _fFmpegBootstrapper.GetFFmpegPath();
         string ffmpegPath = Path.Combine(ffmpegDir, FfmpegExe);
-        using var process = new Process { StartInfo = new ProcessStartInfo(ffmpegPath, args) { UseShellExecute = false, CreateNoWindow = true }, EnableRaisingEvents = true };
+
+        using var process = new Process 
+        { 
+            StartInfo = new ProcessStartInfo(ffmpegPath, args) 
+            { 
+                UseShellExecute = false, 
+                CreateNoWindow = true,
+                RedirectStandardError = true 
+            }, 
+            EnableRaisingEvents = true 
+        };
+
         _reporter.ShowInfo("Склейка аудио...");
         process.Start();
+
+        ConsumeStreamErrors(process.StandardError);
+
         process.WaitForExit();
+
         if (process.ExitCode == 0 && File.Exists(outputVideo))
         {
             File.Delete(videoSource);

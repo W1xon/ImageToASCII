@@ -1,4 +1,5 @@
 using ImageToASCII.Core;
+using ImageToASCII.Web.Files;
 
 namespace ImageToASCII.Web;
 
@@ -10,7 +11,10 @@ public class Program
         builder.Services.AddSingleton<ConversionQueue>();
         builder.Services.AddSingleton<IReporter, WebReporter>();
         builder.Services.AddSingleton<FileSignatureValidator>();
-        builder.Services.AddHostedService<ConversionImageWorker>();
+        builder.Services.AddSingleton<FileSystemService>();
+        builder.Services.AddSingleton<ConvertMediaService>();
+        builder.Services.AddHostedService<MediaConversionWorker>();
+        builder.Services.AddHostedService<MediaCleanupWorker>();
         
         builder.Services.AddControllers();
 
