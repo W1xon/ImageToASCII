@@ -8,9 +8,9 @@ namespace ImageToASCII.Web.Controllers;
 [Route("[controller]")]
 public class MediaController : ControllerBase
 {
-    private readonly FileSignatureValidator _validator;
+    private readonly MediaValidator _validator;
     private readonly ConvertMediaService _convertMediaService;
-    public MediaController(ConvertMediaService convertMediaService, FileSignatureValidator validator)
+    public MediaController(ConvertMediaService convertMediaService, MediaValidator validator)
     {
         _validator = validator;
         _convertMediaService = convertMediaService;
@@ -20,7 +20,7 @@ public class MediaController : ControllerBase
     public IActionResult SavePage()
     {
         return PhysicalFile(
-            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "upload.html"),
+            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "convert.html"),
             "text/html");
     }
 
@@ -43,15 +43,15 @@ public class MediaController : ControllerBase
         return PhysicalFile(result.OutputPath, result.ContentType, enableRangeProcessing: true);
     }
     
-    [RequestSizeLimit(33554432)]
+    [RequestSizeLimit(30 * 1024 * 1024)]
     [HttpPost("convert")]
     public async Task<IActionResult> Convert([FromForm] ConvertMediaRequest media)
     {
-        var (isValid, jobKind) = await _validator.IsValidFile(media.File);
-        if (!isValid) return BadRequest("Неверный формат файла");
-    
+        var (isValid, jobKind, errorReason) = await _validator.ValidateAsync(media);
+        if (!isValid) 
+            return BadRequest(errorReason);
+
         Guid jobId = await _convertMediaService.EnqueueJobAsync(media, jobKind);
-    
         return Ok(new { jobId });
     }
 }

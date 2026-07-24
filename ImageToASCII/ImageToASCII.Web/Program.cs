@@ -13,10 +13,11 @@ public class Program
         
         builder.Services.AddSingleton<ConversionQueue>();
         builder.Services.AddSingleton<IReporter, WebReporter>();
-        builder.Services.AddSingleton<FileSignatureValidator>();
+        builder.Services.AddSingleton<MediaValidator>();
         builder.Services.AddSingleton<FileSystemService>();
         builder.Services.AddSingleton<ConvertMediaService>();
         builder.Services.AddSingleton<FFmpegBootstrapper>();
+        builder.Services.AddSingleton<FfprobeMediaInspector>();
         
         builder.Services.AddKeyedSingleton<IConversionProcessor, ImageConversionProcessor>(JobType.ImageToAscii);
         builder.Services.AddKeyedSingleton<IConversionProcessor, VideoConversionProcessor>(JobType.VideoToAscii);

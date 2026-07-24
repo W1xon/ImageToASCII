@@ -1,8 +1,10 @@
 const uploadForm = document.querySelector("#uploadForm");
 const fileInput = document.querySelector("#fileInput");
+const fileDrop = document.querySelector("#fileDrop");
 const fileDropContent = document.querySelector("#fileDropContent");
 const fileDropName = document.querySelector("#fileDropName");
 const filePreview = document.querySelector("#filePreview");
+const widthInput = document.querySelector("#width");
 
 const resultStatus = document.querySelector("#resultStatus");
 const resultImage = document.querySelector("#resultImage");
@@ -27,22 +29,73 @@ InitEvents();
 function InitEvents() {
     if (fileInput) fileInput.addEventListener("change", OnFileInputChange);
     if (uploadForm) uploadForm.addEventListener("submit", OnFormSubmit);
+    InitDragAndDrop();
 }
 
-function OnFileInputChange() {
+function InitDragAndDrop() {
+    if (!fileDrop) return;
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        fileDrop.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            fileDrop.classList.add('drag-over');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        fileDrop.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            fileDrop.classList.remove('drag-over');
+        }, false);
+    });
+
+    fileDrop.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        if (dt && dt.files.length > 0) {
+            fileInput.files = dt.files;
+            OnFileInputChange.call(fileInput);
+        }
+    });
+}
+
+async function OnFileInputChange() {
     ClearSourcePreview();
 
     if (this.files.length > 0) {
         const file = this.files[0];
+
+        const maxBytes = 30 * 1024 * 1024;
+        if (file.size > maxBytes) {
+            SetStatus("err", `Файл слишком большой (${(file.size / (1024 * 1024)).toFixed(1)} МБ). Лимит — 30 МБ.`);
+            ResetFileInputUI();
+            ResetResultState();
+            return;
+        }
+
+        const isVideo = file.type.startsWith("video/");
+
+        UpdateWidthLimitUI(isVideo);
+
+        if (isVideo) {
+            const duration = await GetVideoDurationClient(file);
+            if (duration && duration > 20) {
+                SetStatus("err", `Видео слишком длинное (${Math.round(duration)} сек). Лимит — 60 сек.`);
+                ResetFileInputUI();
+                ResetResultState();
+                return;
+            }
+        }
+
         fileDropName.textContent = TruncateFileName(file.name);
         fileDropContent.style.display = "none";
 
         sourcePreviewURL = URL.createObjectURL(file);
-        RenderSourcePreview(sourcePreviewURL, file.type.startsWith("video/"));
+        RenderSourcePreview(sourcePreviewURL, isVideo);
     } else {
-        fileDropName.textContent = "";
-        fileDropContent.style.display = "block";
-        filePreview.style.display = "none";
+        ResetFileInputUI();
+        UpdateWidthLimitUI(false);
     }
 
     ResetResultState();
@@ -54,6 +107,20 @@ async function OnFormSubmit(e) {
         e.stopPropagation();
     }
 
+    if (!fileInput || !fileInput.files.length) {
+        SetStatus("err", "Выберите файл для загрузки");
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    const isVideo = file.type.startsWith("video/");
+    const currentWidth = parseInt(widthInput ? widthInput.value : "0", 10);
+    const maxWidth = isVideo ? 100 : 350;
+
+    if (currentWidth > maxWidth) {
+        SetStatus("err", `Максимальная ширина для ${isVideo ? "видео" : "изображения"} — ${maxWidth}`);
+        return;
+    }
     const formData = new FormData(uploadForm);
 
     ResetResultState();
@@ -67,8 +134,8 @@ async function OnFormSubmit(e) {
         });
 
         if (!response.ok) {
-            const errorText = await response.text();
-            SetStatus("err", `Ошибка сервера: ${response.status} ${errorText}`);
+            const errorReason = await ParseResponseError(response);
+            SetStatus("err", errorReason);
             SetSubmitDisabled(false);
             return;
         }
@@ -80,7 +147,7 @@ async function OnFormSubmit(e) {
 
     } catch (error) {
         console.error("Fetch error:", error);
-        SetStatus("err", `Ошибка передачи: ${error.message}`);
+        SetStatus("err", `Ошибка соединения: ${error.message}`);
         SetSubmitDisabled(false);
     }
 }
@@ -173,6 +240,8 @@ function RenderSourcePreview(url, isVideo) {
         const video = document.createElement("video");
         video.src = url;
         video.muted = true;
+        video.autoplay = true;
+        video.loop = true;
         filePreview.appendChild(video);
     } else {
         const img = document.createElement("img");
@@ -223,6 +292,13 @@ function ClearSourcePreview() {
     if (filePreview) filePreview.innerHTML = "";
 }
 
+function ResetFileInputUI() {
+    fileInput.value = "";
+    fileDropName.textContent = "";
+    fileDropContent.style.display = "block";
+    filePreview.style.display = "none";
+}
+
 function ResetResultState() {
     if (resultImage) {
         resultImage.style.display = "none";
@@ -238,6 +314,75 @@ function ResetResultState() {
     if (resultPlaceholder) {
         resultPlaceholder.style.display = "flex";
     }
+}
+
+function UpdateWidthLimitUI(isVideo) {
+    if (!widthInput) return;
+    const maxVal = isVideo ? 100 : 350;
+    widthInput.max = maxVal;
+    if (parseInt(widthInput.value, 10) > maxVal) {
+        widthInput.value = maxVal;
+    }
+    const hint = widthInput.nextElementSibling;
+    if (hint && hint.classList.contains("field-hint")) {
+        hint.textContent = isVideo ? "от 10 до 100 символов (ограничение для видео)" : "от 10 до 350 символов";
+    }
+}
+
+function GetVideoDurationClient(file) {
+    return new Promise((resolve) => {
+        const video = document.createElement("video");
+        video.preload = "metadata";
+        const url = URL.createObjectURL(file);
+        video.src = url;
+
+        video.onloadedmetadata = () => {
+            URL.revokeObjectURL(url);
+            resolve(video.duration);
+        };
+
+        video.onerror = () => {
+            URL.revokeObjectURL(url);
+            resolve(null);
+        };
+    });
+}
+
+async function ParseResponseError(response) {
+    let rawMessage = "";
+
+    try {
+        const text = await response.text();
+        if (text) {
+            try {
+                const data = JSON.parse(text);
+
+                if (typeof data === "string") {
+                    rawMessage = data;
+                } else if (data.errors && typeof data.errors === "object") {
+                    rawMessage = Object.values(data.errors).flat().join("; ");
+                } else {
+                    rawMessage = data.error || data.message || data.detail || data.title || "";
+                }
+            } catch {
+                rawMessage = text.replace(/<[^>]*>?/gm, '').trim();
+            }
+        }
+    } catch { }
+
+    rawMessage = rawMessage
+        .replace(/^(ошибка\s*сервера|ошибка|bad\s*request|error)\s*[:\-]?\s*(\d{3})?\s*[:\-]?\s*/i, "")
+        .trim();
+
+    if (rawMessage) {
+        return rawMessage.charAt(0).toUpperCase() + rawMessage.slice(1);
+    }
+
+    if (response.status === 400) return "Некорректные параметры запроса";
+    if (response.status === 413) return "Файл слишком большой";
+    if (response.status >= 500) return "Произошла ошибка при обработке на сервере";
+
+    return "Не удалось выполнить запрос";
 }
 
 function ExtractFileName(response, isVideo) {

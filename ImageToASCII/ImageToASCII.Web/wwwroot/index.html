@@ -3,37 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ImageToASCII API</title>
+    <title>ImageToASCII — Конвертер медиа в ASCII-арт</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<div class="bg-canvas">
-    <div class="bg-blob bg-blob-1"></div>
-    <div class="bg-blob bg-blob-2"></div>
-</div>
+<div class="bg-canvas" id="asciiContainer"></div>
+
 <div class="page">
     <div class="card">
-        <h1>Конвертер картинок в ASCII-арт</h1>
-        <p class="subtitle">Загрузи изображение или видео, выбери палитру символов — сервис вернёт результат в виде ASCII-графики.</p>
+        <div class="home-grid">
+            <div class="home-content">
+                <h1>Конвертер картинок в ASCII-арт</h1>
+                <p class="subtitle">Загрузи изображение или видео, выбери палитру символов — сервис вернёт результат в виде ASCII-графики.</p>
 
-        <div class="route-tag">
-            <span class="method">POST</span>
-            <span>/media/convert</span>
-        </div>
+                <ul class="feature-list">
+                    <li>Поддержка изображений и видео: JPG, PNG, GIF, BMP, WEBP, MP4, MOV, AVI, WEBM, MKV, FLV, WMV</li>
+                    <li>10 наборов символов — от базового до плотных блоков</li>
+                    <li>4 типа палитры: базовая, 16 цветов, 7 цветов, естественная</li>
+                    <li>Настраиваемая ширина результата</li>
+                </ul>
 
-        <ul class="feature-list">
-            <li>Поддержка изображений и видео: JPG, PNG, GIF, BMP, WEBP, MP4, MOV, AVI, WEBM, MKV, FLV, WMV</li>
-            <li>10 наборов символов — от базового до плотных блоков</li>
-            <li>4 типа палитры: базовая, 16 цветов, 7 цветов, естественная</li>
-            <li>Настраиваемая ширина результата</li>
-        </ul>
+                <div class="btn-container">
+                    <a class="btn" href="/media/convert">Открыть загрузку →</a>
+                </div>
+            </div>
 
-        <div class="btn-container">
-            <a class="btn" href="/media/convert">Открыть загрузку →</a>
+            <div class="home-media">
+                <div class="comparison-slider" style="--pos: 50%;">
+                    <div class="img-wrapper img-before">
+                        <img src="/images/demo-original.jpg" alt="Оригинал">
+                        <span class="label">Оригинал</span>
+                    </div>
+                    <div class="img-wrapper img-after">
+                        <img src="/images/demo-ascii.png" alt="ASCII результат">
+                        <span class="label">ASCII</span>
+                    </div>
+                    <div class="slider-line"></div>
+                    <input type="range" min="0" max="100" value="50" class="slider-input" aria-label="Сравнение результатов">
+                </div>
+            </div>
         </div>
     </div>
 
-    <p class="footnote">wixon shade / imagetoascii</p>
+    <p class="footnote">wixon / imagetoascii</p>
 </div>
+
+<script>
+    const slider = document.querySelector('.comparison-slider');
+    const input = document.querySelector('.slider-input');
+
+    input.addEventListener('input', (e) => {
+        slider.style.setProperty('--pos', `${e.target.value}%`);
+    });
+</script>
+<script src="/js/ascii-bg.js"></script>
 </body>
 </html>

@@ -3,8 +3,8 @@
     color-scheme: light dark;
 
     --bg: #fafaf9;
-    --surface: #ffffff;
-    --surface-muted: #f4f4f3;
+    --surface: rgba(255, 255, 255, 0.82);
+    --surface-muted: rgba(244, 244, 243, 0.7);
     --border: #e5e5e3;
     --border-strong: #d4d4d1;
     --text-primary: #1a1a18;
@@ -38,8 +38,8 @@
 @media (prefers-color-scheme: dark) {
     :root {
         --bg: #0e0e0d;
-        --surface: #171715;
-        --surface-muted: #1e1e1c;
+        --surface: rgba(23, 23, 21, 0.82);
+        --surface-muted: rgba(30, 30, 28, 0.7);
         --border: #2a2a27;
         --border-strong: #3a3a36;
         --text-primary: #f0f0ee;
@@ -92,28 +92,23 @@ html {
 
 body {
     margin: 0;
-    padding: 0;
-    position: relative;
+    background: transparent;
     color: var(--text-primary);
     font-family: var(--font-sans);
     line-height: 1.5;
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    position: relative;
+    overflow-x: hidden;
 }
 
 .page {
     width: 100%;
     max-width: 94vw;
-    margin: 0 auto;
+    margin: 2rem auto;
     padding: clamp(1rem, 2vw, 2.5rem);
     position: relative;
     z-index: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
 }
 
 /* --- Header / brand --- */
@@ -159,11 +154,50 @@ body {
 /* --- Card --- */
 .card {
     background: var(--surface);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     padding: clamp(1.2rem, 2.5vw, 2.5rem);
     width: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '</>';
+    position: absolute;
+    right: -20px;
+    bottom: -30px;
+    font-family: var(--font-mono);
+    font-size: 10rem;
+    font-weight: 900;
+    color: var(--accent);
+    opacity: 0.05;
+    filter: blur(6px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, var(--accent) 0%, transparent 60%);
+    opacity: 0.03;
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Убедимся, что контент внутри карточки выше декоративных псевдоэлементов */
+.card > * {
+    position: relative;
+    z-index: 1;
 }
 
 /* --- Typography --- */
@@ -210,8 +244,8 @@ h1 {
 /* --- Buttons --- */
 .btn-container {
     display: flex;
-    justify-content: center;
-    margin-top: 1rem;
+    justify-content: flex-start;
+    margin-top: 1.5rem;
 }
 
 .form-submit-container {
@@ -302,6 +336,7 @@ h1 {
 #uploadForm {
     display: flex;
     flex-direction: column;
+    margin-bottom: 1rem;
     height: 100%;
     justify-content: space-between;
 }
@@ -436,50 +471,23 @@ h1 {
     object-fit: contain;
     border-radius: 6px;
 }
-
 .bg-canvas {
     position: fixed;
-    inset: 0;
-    z-index: 0;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
     pointer-events: none;
-    overflow: hidden;
 }
 
-.bg-blob {
+.ascii-particle {
     position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.22;
-    will-change: transform;
-}
-
-.bg-blob-1 {
-    width: clamp(300px, 35vw, 800px);
-    height: clamp(300px, 35vw, 800px);
-    background: var(--accent);
-    top: -10%;
-    left: -8%;
-    animation: drift1 26s ease-in-out infinite;
-}
-
-.bg-blob-2 {
-    width: clamp(250px, 30vw, 700px);
-    height: clamp(250px, 30vw, 700px);
-    background: var(--accent);
-    opacity: 0.12;
-    bottom: -12%;
-    right: -6%;
-    animation: drift2 32s ease-in-out infinite;
-}
-
-@keyframes drift1 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(60px, 40px) scale(1.1); }
-}
-
-@keyframes drift2 {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(-50px, -30px) scale(1.08); }
+    font-family: var(--font-mono);
+    color: var(--accent);
+    user-select: none;
+    pointer-events: none;
+    will-change: transform, opacity;
 }
 
 .file-drop:hover .file-drop-icon {
@@ -536,7 +544,7 @@ h1 {
 
 #downloadContainer {
     display: none;
-    margin-top: 1rem;
+    margin-top: 1rem; 
     width: 100%;
 }
 
@@ -564,7 +572,8 @@ h1 {
     font-size: 0.85rem;
     padding: 0.6rem 0.9rem;
     border-radius: 8px;
-    margin-bottom: 0.8rem;
+    margin-top: 1rem;
+    margin-bottom: 0;
     display: none;
     font-weight: 600;
 }
@@ -574,6 +583,100 @@ h1 {
     align-items: center;
     gap: 8px;
     animation: slideDown 0.2s ease;
+}
+
+/* --- Компактный слайдер сравнения --- */
+.comparison-slider {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 240px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    user-select: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.img-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Слой "После" обрезается по движению ползунка */
+.img-after {
+    clip-path: polygon(var(--pos) 0, 100% 0, 100% 100%, var(--pos) 100%);
+}
+
+/* Метки "Оригинал" и "ASCII" */
+.label {
+    position: absolute;
+    bottom: 8px;
+    padding: 2px 8px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    border-radius: 5px;
+    font-size: 0.68rem;
+    color: #fff;
+    font-family: monospace;
+    pointer-events: none;
+}
+
+.img-before .label { left: 8px; }
+.img-after .label { right: 8px; }
+
+/* Разделительная линия */
+.slider-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--pos);
+    width: 2px;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.slider-line::after {
+    content: '↔';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    background: #fff;
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+/* Прозрачный input поверх всего */
+.slider-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: ew-resize;
+    z-index: 3;
+    margin: 0;
 }
 
 @keyframes slideDown {
@@ -619,6 +722,35 @@ h1 {
     text-align: center;
 }
 
+/* --- Main Page Grid Layout --- */
+.home-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.home-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.home-media {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+@media (min-width: 768px) {
+    .home-grid {
+        grid-template-columns: 1.2fr 1fr;
+        gap: clamp(1.5rem, 3vw, 3rem);
+    }
+    
+}
+
 /* --- Desktop Layout (2 Columns) --- */
 @media (min-width: 768px) {
     .card-two-cols {
@@ -656,9 +788,20 @@ h1 {
         margin-top: 0;
     }
 }
-
+#asciiContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
 @media (prefers-reduced-motion: reduce) {
-    .status-dot, .spinner, .bg-blob {
+    .status-dot, .spinner {
         animation: none !important;
     }
 }

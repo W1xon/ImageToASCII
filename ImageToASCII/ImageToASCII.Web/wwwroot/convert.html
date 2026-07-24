@@ -8,17 +8,13 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-<div class="bg-canvas">
-    <div class="bg-blob bg-blob-1"></div>
-    <div class="bg-blob bg-blob-2"></div>
-</div>
+<div class="bg-canvas" id="asciiContainer"></div>
 <div class="page">
     <div class="card card-two-cols">
         <div class="card-left">
             <div>
-                <h1>Новая конвертация</h1>
-                <p class="subtitle">Выбери файл и параметры палитры. Формат: JPG, PNG, GIF, BMP, WEBP, MP4, MOV, AVI, WEBM, MKV, FLV, WMV.</p>
-
+                <h1>Загрузка файла</h1>
+                <p class="subtitle">Загрузи файл и настрой параметры конвертации. Поддерживаются форматы: JPG, PNG, GIF, BMP, WEBP, MP4, MOV, AVI, WEBM, MKV, FLV, WMV.</p>
                 <form id="uploadForm">
                     <div class="form-group">
                         <div class="field">
@@ -28,17 +24,16 @@
                                         <path d="M12 16V4M12 4L7 9M12 4l5 5" stroke-linecap="round" stroke-linejoin="round"/>
                                         <path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
-                                    <span id="fileDropText">Нажми, чтобы выбрать файл</span>
+                                    <span id="fileDropText">Перетащи файл сюда или нажми, чтобы выбрать</span>
                                 </div>
                                 <div id="filePreview" class="file-preview"></div>
                                 <span class="file-name" id="fileDropName"></span>
                                 <input type="file" id="fileInput" name="file" accept=".jpg,.jpeg,.png,.gif,.bmp,.webp,.mp4,.mov,.avi,.webm,.mkv,.flv,.wmv" required>
                             </label>
                         </div>
-
                         <div class="field-row">
                             <div class="field">
-                                <label for="paletteType">тип палитры</label>
+                                <label for="paletteType">Палитра</label>
                                 <select id="paletteType" name="paletteType" required>
                                     <option value="1">Basic — базовая</option>
                                     <option value="2">Palette16 — 16 цветов</option>
@@ -47,7 +42,7 @@
                                 </select>
                             </div>
                             <div class="field">
-                                <label for="paletteIndex">набор символов</label>
+                                <label for="paletteIndex">Набор символов</label>
                                 <select id="paletteIndex" name="paletteIndex" required>
                                     <option value="0" selected>Basic —  .:-=+*#%@</option>
                                     <option value="1">Detailed — .`,:;~+i&gt;rcvunzX0OQmW&amp;8%B@</option>
@@ -62,23 +57,19 @@
                                 </select>
                             </div>
                         </div>
-
                         <div class="field">
-                            <label for="width">ширина результата (px)</label>
+                            <label for="width">Ширина результата</label>
                             <input type="number" id="width" name="width" value="200" min="10" max="350" required>
                             <span class="field-hint">от 10 до 350 символов</span>
                         </div>
                     </div>
-
                     <div class="form-submit-container">
-                        <button type="submit" class="btn">Отправить на конвертацию</button>
+                        <button type="submit" class="btn">Конвертировать</button>
                     </div>
                 </form>
             </div>
         </div>
-
         <div class="card-right">
-            <div id="resultStatus"></div>
             <div id="imageContainer">
                 <div id="resultPlaceholder" class="preview-placeholder">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="36" height="36">
@@ -86,11 +77,12 @@
                         <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
                         <path d="M21 15l-5-5L5 21" stroke-linecap="round"/>
                     </svg>
-                    <span>Здесь будет результат</span>
+                    <span>Результат появится здесь после обработки</span>
                 </div>
                 <img id="resultImage" alt="Результат конвертации">
                 <video id="resultVideo" controls></video>
             </div>
+            <div id="resultStatus"></div>
             <div id="downloadContainer">
                 <a id="downloadBtn" class="btn btn-download">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="16" height="16">
@@ -102,11 +94,11 @@
             </div>
         </div>
     </div>
-
     <p class="footnote">
         <a href="/" class="btn btn-ghost btn-sm">← на главную</a>
     </p>
 </div>
+<script src="/js/ascii-bg.js"></script>
 <script src="/js/Upload.js"></script>
 </body>
 </html>
