@@ -20,20 +20,18 @@ public class VideoRecorder : IDisposable
     private static string FfprobeExe => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffprobe.exe" : "ffprobe";
     private IReporter _reporter;
     private FFmpegBootstrapper _fFmpegBootstrapper;
-    public VideoRecorder(IReporter reporter, int fps = 30)
+    public VideoRecorder(FFmpegBootstrapper  bootstrapper, IReporter reporter, int fps = 30)
     {
-        _fFmpegBootstrapper = new FFmpegBootstrapper(reporter);
+        _fFmpegBootstrapper = bootstrapper;
         _reporter = reporter;
         _fps = fps;
     }
     public async Task<bool> InitializeFFmpegAsync()
     {
         if (_isFFmpegReady) return true;
-        string ffmpegDir = Path.Combine(AppContext.BaseDirectory, "ffmpeg");
-        bool ok = await _fFmpegBootstrapper.EnsureFFmpegAsync(ffmpegDir);
-        if (!ok)
+        if (!_fFmpegBootstrapper.IsExist)
         {
-            _reporter.ShowError("Не удалось инициализировать FFmpeg");
+            _reporter.ShowError("FFmpeg не установлен");
             _isFFmpegReady = false;
             return false;
         }

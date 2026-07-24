@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using ImageToASCII.ColorSystem;
+using ImageToASCII.Services;
 using SkiaSharp;
 namespace ImageToASCII.Core.Processors;
 public class VideoToAsciiConverter
@@ -7,11 +8,11 @@ public class VideoToAsciiConverter
     private readonly VideoRecorder _videoRecorder;
     private readonly AsciiExporter _asciiExporter;
     private IReporter _reporter;
-    public VideoToAsciiConverter(AsciiExporter asciiExporter, IReporter reporter)
+    public VideoToAsciiConverter(AsciiExporter asciiExporter,FFmpegBootstrapper bootstrapper, IReporter reporter)
     {
         _reporter = reporter;
         _asciiExporter = asciiExporter;
-        _videoRecorder = new VideoRecorder(reporter);
+        _videoRecorder = new VideoRecorder(bootstrapper, reporter);
     }
     public async Task InitializeAsync()
     {

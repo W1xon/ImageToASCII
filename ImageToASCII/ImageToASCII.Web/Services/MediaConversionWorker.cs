@@ -6,13 +6,16 @@ namespace ImageToASCII.Web;
 
 public class MediaConversionWorker : BackgroundService
 {
-    private ConversionQueue _queue;
-    private IReporter _reporter;
+    private readonly ConversionQueue _queue;
+    private readonly IReporter _reporter;
+    private readonly IServiceProvider _serviceProvider;
+    
     private int _maxParallelJob = Environment.ProcessorCount;
-    public MediaConversionWorker(ConversionQueue queue, IReporter reporter)
+    public MediaConversionWorker(ConversionQueue queue, IReporter reporter, IServiceProvider serviceProvider)
     {
         _queue = queue;
         _reporter = reporter;
+        _serviceProvider = serviceProvider;
     }
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -30,7 +33,7 @@ public class MediaConversionWorker : BackgroundService
         {
             await foreach (var job in _queue.ConversionChannel.Reader.ReadAllAsync(stoppingToken))
             {
-                await Task.Run(async () => await ProcessJob(job), stoppingToken) ;
+                await ProcessJob(job);
             }
         }
         catch(OperationCanceledException){}
@@ -46,7 +49,7 @@ public class MediaConversionWorker : BackgroundService
         try
         {
             job.Status = JobStatus.Processing;
-            var processor = ConversionProcessorFactory.Create(job.Type);
+            var processor = _serviceProvider.GetRequiredKeyedService<IConversionProcessor>(job.Type);
         
             await processor.Process(job, _reporter);
         

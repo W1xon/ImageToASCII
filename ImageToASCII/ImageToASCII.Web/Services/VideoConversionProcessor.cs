@@ -2,6 +2,7 @@ using ImageToASCII.Core;
 using ImageToASCII.ColorSystem;
 using ImageToASCII.Core.Converters;
 using ImageToASCII.Core.Processors;
+using ImageToASCII.Services;
 using ImageToASCII.Web.Models;
 using SkiaSharp;
 
@@ -9,6 +10,11 @@ namespace ImageToASCII.Web;
 
 public class VideoConversionProcessor : IConversionProcessor
 {
+    private readonly FFmpegBootstrapper _bootstrapper;
+    public VideoConversionProcessor(FFmpegBootstrapper bootstrapper)
+    {
+        _bootstrapper = bootstrapper;
+    }
     public async Task Process(ConversionJob job, IReporter reporter)
     {
         var converter = new BitmapToAsciiConverter(job.Settings.AsciiPalette.Characters.ToArray());
@@ -16,7 +22,7 @@ public class VideoConversionProcessor : IConversionProcessor
         
         var classifier = ColorClassifierFactory
             .Create(job.Settings.PaletteType);
-        var videoConverter = new VideoToAsciiConverter(exporter, reporter);
+        var videoConverter = new VideoToAsciiConverter(exporter, _bootstrapper, reporter);
 
         await videoConverter.InitializeAsync();
 

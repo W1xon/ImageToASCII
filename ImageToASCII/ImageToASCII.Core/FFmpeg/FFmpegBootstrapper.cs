@@ -7,6 +7,8 @@ namespace ImageToASCII.Services;
 
 public  class FFmpegBootstrapper
 {
+    public bool IsExist => _isReady;
+    
     private const string FFMPEG_VERSION = "6.1";
     private const string TEMP_DIR_NAME = "temp_extract";
 
@@ -26,7 +28,7 @@ public  class FFmpegBootstrapper
     {
         _reporter = reporter;
     }
-    public  async Task<bool> EnsureFFmpegAsync(string targetDir)
+    public async Task<bool> EnsureFFmpegAsync(string targetDir)
     {
         if (_isReady) return true;
 
