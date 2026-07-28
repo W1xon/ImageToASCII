@@ -2,27 +2,30 @@
 using SkiaSharp;
 using ImageToASCII.ColorSystem;
 using ImageToASCII.Core.Converters;
-using ImageToASCII.Services;
+
 namespace ImageToASCII.Core.Processors;
+
 public class AsciiExporter : ImageProcessorBase, IDisposable
 {
     private SKPaint? _textPaint;
     private readonly SKTypeface _typeface;
     private readonly Dictionary<char, string> _stringCache = new();
-    private float _lastFontSize = -1;
+    private float _lastFONTSIZE = -1;
     private float _charWidth;
     private IReporter _reporter;
     private GlyphMaskCache? _maskCache;
-    private float _maskCacheFontSize = -1;
+    private float _maskCacheFONTSIZE = -1;
     private char[]? _warmedPaletteChars;
+    private const int FONTSIZE = 12;
+
     public AsciiExporter(BitmapToAsciiConverter converter, IReporter reporter) : base(converter)
     {
         _reporter = reporter;
         _typeface = LoadBestMonospaceTypeface();
-        
         for (int i = 0; i < 256; i++)
             _stringCache[(char)i] = ((char)i).ToString();
     }
+
     private SKTypeface LoadBestMonospaceTypeface()
     {
         string[] candidates = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
@@ -42,70 +45,78 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
         }
         return SKTypeface.Default;
     }
-    public SKBitmap GetProcessing(SKBitmap bmp, IColorClassifier classifier, int fontSize = 16)
+
+    public (int pixelWidth, int pixelHeight, int outputWidth, int outputHeight) GetAsciiSize(int originalWidth, int originalHeight)
     {
-        var data = PrepareInternal(bmp, classifier, fontSize, verbose: false);
-        return RenderCoreOptimized(data, fontSize);
+        GetOrCreatePaint(FONTSIZE);
+        float fontAspectRatio = _charWidth / FONTSIZE;
+        var (pixelW, pixelH) = CalculateTargetSize(originalWidth, originalHeight, fontAspectRatio);
+
+        int outW = (int)(pixelW * _charWidth);
+        int outH = pixelH * FONTSIZE;
+        if (outW % 2 != 0) outW--;
+        if (outH % 2 != 0) outH--;
+
+        return (pixelW, pixelH, outW, outH);
     }
-    public SKBitmap PrintAndSave(SKBitmap bmp, IColorClassifier classifier, int fontSize = 16)
+
+    public SKBitmap GetProcessing(SKBitmap bmp, IColorClassifier classifier)
     {
-        var data = PrepareInternal(bmp, classifier, fontSize, verbose: true);
+        var data = PrepareInternal(bmp, classifier,  verbose: false);
+        return RenderCoreOptimized(data, FONTSIZE);
+    }
+
+    public SKBitmap PrintAndSave(SKBitmap bmp, IColorClassifier classifier)
+    {
+        var data = PrepareInternal(bmp, classifier,  verbose: true);
         _reporter.ShowInfo("Рендеринг ASCII изображения...");
-        return RenderCoreWithProgress(data, fontSize);
+        return RenderCoreWithProgress(data, FONTSIZE);
     }
 
-    private SKBitmap RenderCoreOptimized(AsciiPrepareResult data, int fontSize)
+    private SKBitmap RenderCoreOptimized(AsciiPrepareResult data, int FONTSIZE)
     {
-        EnsureMaskCache(fontSize, _asciiConverter.Table);
-
+        EnsureMaskCache(FONTSIZE, _asciiConverter.Table);
         return FastGlyphRenderer.Render(
             data.AsciiChars,
+            data.GridWidth,
+            data.GridHeight,
             data.Colors,
             _maskCache!,
-            fontSize,
+            FONTSIZE,
             _charWidth,
             data.OutputWidth,
             data.OutputHeight);
     }
 
-    private SKBitmap RenderCoreWithProgress(AsciiPrepareResult data, int fontSize)
+    private SKBitmap RenderCoreWithProgress(AsciiPrepareResult data, int FONTSIZE)
     {
-        EnsureMaskCache(fontSize, _asciiConverter.Table);
-
-        var chars = data.AsciiChars;
-        int h = chars.GetLength(0);
-        int w = chars.GetLength(1);
-        int total = w * h;
-        int progressStep = Math.Max(1, total / 20);
-        int lastProgress = 0;
-
+        EnsureMaskCache(FONTSIZE, _asciiConverter.Table);
         _reporter.ShowInfo("  Прогресс рендеринга: 0%   ");
-
         var output = FastGlyphRenderer.Render(
             data.AsciiChars,
+            data.GridWidth,
+            data.GridHeight,
             data.Colors,
             _maskCache!,
-            fontSize,
+            FONTSIZE,
             _charWidth,
             data.OutputWidth,
             data.OutputHeight);
-
         Console.WriteLine("\r  Прогресс рендеринга: 100%   ");
         _reporter.ShowSuccess("Рендеринг завершён!");
         return output;
     }
 
-    private void EnsureMaskCache(int fontSize, IReadOnlyList<char> paletteChars)
+    private void EnsureMaskCache(int FONTSIZE, IReadOnlyList<char> paletteChars)
     {
-        bool needNewCache = _maskCache == null || Math.Abs(_maskCacheFontSize - fontSize) > 0.01f;
+        bool needNewCache = _maskCache == null || Math.Abs(_maskCacheFONTSIZE - FONTSIZE) > 0.01f;
         if (needNewCache)
         {
             _maskCache?.Dispose();
-            _maskCache = new GlyphMaskCache(_typeface, fontSize, _charWidth);
-            _maskCacheFontSize = fontSize;
+            _maskCache = new GlyphMaskCache(_typeface, FONTSIZE, _charWidth);
+            _maskCacheFONTSIZE = FONTSIZE;
             _warmedPaletteChars = null;
         }
-
         if (_warmedPaletteChars == null || !paletteChars.SequenceEqual(_warmedPaletteChars))
         {
             _maskCache.Warmup(new HashSet<char>(paletteChars));
@@ -113,7 +124,7 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
         }
     }
 
-    private SKPaint GetOrCreatePaint(int fontSize)
+    private SKPaint GetOrCreatePaint(int FONTSIZE)
     {
         if (_textPaint == null)
         {
@@ -125,60 +136,84 @@ public class AsciiExporter : ImageProcessorBase, IDisposable
                 TextAlign = SKTextAlign.Left
             };
         }
-        if (Math.Abs(_lastFontSize - fontSize) > 0.01f)
+        if (Math.Abs(_lastFONTSIZE - FONTSIZE) > 0.01f)
         {
-            _textPaint.TextSize = fontSize;
-            _lastFontSize = fontSize;
+            _textPaint.TextSize = FONTSIZE;
+            _lastFONTSIZE = FONTSIZE;
             _charWidth = _textPaint.MeasureText("W");
         }
         return _textPaint;
     }
-    private AsciiPrepareResult PrepareInternal(SKBitmap bitmap, IColorClassifier colorClassifier, int fontSize, bool verbose)
+
+    private unsafe AsciiPrepareResult PrepareInternal(SKBitmap bitmap, IColorClassifier colorClassifier, bool verbose)
     {
-        GetOrCreatePaint(fontSize);
+        GetOrCreatePaint(FONTSIZE);
         if (verbose)
         {
             Console.WriteLine();
             _reporter.ShowHeader("--- Информация о генерации ---");
             _reporter.ShowInfo($"Оригинал: {bitmap.Width}x{bitmap.Height}px");
         }
-        float fontAspectRatio = _charWidth / (float)fontSize;
+
+        float fontAspectRatio = _charWidth / (float)FONTSIZE;
         using var resized = ResizeBitmap(bitmap, fontAspectRatio);
-        
-        var asciiChars = _asciiConverter.Convert(resized);
-        int h = asciiChars.GetLength(0);
-        int w = asciiChars.GetLength(1);
+
+        var asciiChars = _asciiConverter.Convert(resized, out int gridW, out int gridH);
         if (verbose)
-            _reporter.ShowInfo($"Размер сетки: {w}x{h} символов");
-        
-        
+            _reporter.ShowInfo($"Размер сетки: {gridW}x{gridH} символов");
+
         int width = resized.Width;
         int height = resized.Height;
         int total = width * height;
         uint[] colors = new uint[total];
-        Span<uint> colorSpan = colors.AsSpan(0, total);
-        resized.ToGrayscale(colorClassifier, colorSpan);
-        
-        int outW = (int)(w * _charWidth);
-        int outH = h * fontSize;
+
+        fixed (uint* colorPtr = colors)
+        {
+            uint* cptr = colorPtr;
+            IntPtr pixelsAddr = resized.GetPixels();
+            if (pixelsAddr == IntPtr.Zero)
+                throw new Exception("pixelsAddr = 0");
+
+            byte* ptr = (byte*)pixelsAddr;
+            int rowBytes = resized.RowBytes;
+
+            for (int y = 0; y < height; y++)
+            {
+                uint* row = (uint*)(ptr + y * rowBytes);
+                for (int x = 0; x < width; x++)
+                {
+                    uint pixel = row[x];
+                    byte b = (byte)pixel;
+                    byte g = (byte)(pixel >> 8);
+                    byte r = (byte)(pixel >> 16);
+                    *cptr++ = colorClassifier.GetColor(r, g, b);
+                }
+            }
+        }
+
+        int outW = (int)(gridW * _charWidth);
+        int outH = gridH * FONTSIZE;
         if (outW % 2 != 0) outW--;
         if (outH % 2 != 0) outH--;
-        
+
         if (verbose)
         {
-            _reporter.ShowInfo($"Ширина символа: {_charWidth:F2}px, Высота: {fontSize}px");
+            _reporter.ShowInfo($"Ширина символа: {_charWidth:F2}px, Высота: {FONTSIZE}px");
             _reporter.ShowInfo($"Финальный холст: {outW}x{outH}px");
             Console.WriteLine();
         }
-        
+
         return new AsciiPrepareResult
         {
             AsciiChars = asciiChars,
+            GridWidth = gridW,
+            GridHeight = gridH,
             OutputWidth = outW,
             OutputHeight = outH,
             Colors = colors
         };
     }
+
     public void Dispose()
     {
         _textPaint?.Dispose();

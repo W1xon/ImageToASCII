@@ -1,10 +1,17 @@
 using SkiaSharp;
+
 namespace ImageToASCII.Core.Processors;
+
 public static class FastGlyphRenderer
 {
     static byte FastDiv255(int x) => (byte)((x + 1 + (x >> 8)) >> 8);
+
+    private const float BrightnessBoost = 1.4f;
+
     public static unsafe SKBitmap Render(
-        char[,] chars,
+        char[] chars,
+        int gridWidth,
+        int gridHeight,
         uint[] colors,
         GlyphMaskCache maskCache,
         int fontSize,
@@ -12,8 +19,8 @@ public static class FastGlyphRenderer
         int outputWidth,
         int outputHeight)
     {
-        int h = chars.GetLength(0);
-        int w = chars.GetLength(1);
+        int h = gridHeight;
+        int w = gridWidth;
         int cellW = (int)Math.Ceiling(charWidth);
         var output = new SKBitmap(outputWidth, outputHeight, SKColorType.Rgba8888, SKAlphaType.Premul);
 
@@ -23,43 +30,51 @@ public static class FastGlyphRenderer
         uint bgColor = 0xFF000000;
         var pixelSpan = new Span<uint>(outPtr, totalBytes / 4);
         pixelSpan.Fill(bgColor);
+
         int colorIndex = 0;
         for (int y = 0; y < h; y++)
         {
             int baseOutY = y * fontSize;
+            int rowBaseIdx = y * w;
+
             for (int x = 0; x < w; x++)
             {
-                char c = chars[y, x];
+                char c = chars[rowBaseIdx + x];
                 uint packedColor = colors[colorIndex];
                 colorIndex++;
+
                 if (c == ' ')
                     continue;
 
                 var mask = maskCache.GetOrCreate(c);
-                byte r = (byte)((packedColor >> 16) & 0xFF);
-                byte g = (byte)((packedColor >> 8) & 0xFF);
-                byte b = (byte)(packedColor & 0xFF);
+
+                byte r = (byte)Math.Min(255, ((packedColor >> 16) & 0xFF) * BrightnessBoost);
+                byte g = (byte)Math.Min(255, ((packedColor >> 8) & 0xFF) * BrightnessBoost);
+                byte b = (byte)Math.Min(255, (packedColor & 0xFF) * BrightnessBoost);
+
                 int baseOutX = x * cellW;
 
-                for (int my = 0; my < mask.Height; my++)
+                int maxMy = Math.Min(mask.Height, outputHeight - baseOutY);
+                int maxMx = Math.Min(mask.Width, outputWidth - baseOutX);
+
+                for (int my = 0; my < maxMy; my++)
                 {
                     int outY = baseOutY + my;
-                    if (outY >= outputHeight) break;
                     byte* outRow = outPtr + outY * outRowBytes;
                     int maskRowOffset = my * mask.Width;
-                    for (int mx = 0; mx < mask.Width; mx++)
+
+                    for (int mx = 0; mx < maxMx; mx++)
                     {
                         int outX = baseOutX + mx;
-                        if (outX >= outputWidth) break;
                         byte alpha = mask.Alpha[maskRowOffset + mx];
                         if (alpha == 0) continue;
+
                         int pixelOffset = outX * 4;
+
                         if (alpha == 255)
                         {
-                            outRow[pixelOffset + 0] = r;
-                            outRow[pixelOffset + 1] = g;
-                            outRow[pixelOffset + 2] = b;
-                            outRow[pixelOffset + 3] = 255;
+                            *(uint*)(outRow + pixelOffset) =
+                                r | ((uint)g << 8) | ((uint)b << 16) | 0xFF000000;
                         }
                         else
                         {
@@ -72,6 +87,7 @@ public static class FastGlyphRenderer
                 }
             }
         }
+
         output.NotifyPixelsChanged();
         return output;
     }

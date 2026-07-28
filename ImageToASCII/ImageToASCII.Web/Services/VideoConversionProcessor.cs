@@ -4,7 +4,6 @@ using ImageToASCII.Core.Converters;
 using ImageToASCII.Core.Processors;
 using ImageToASCII.Services;
 using ImageToASCII.Web.Models;
-using SkiaSharp;
 
 namespace ImageToASCII.Web;
 
