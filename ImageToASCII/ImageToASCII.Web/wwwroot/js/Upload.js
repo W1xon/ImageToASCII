@@ -320,8 +320,8 @@ function UpdateWidthLimitUI(isVideo) {
   const hint = widthInput.nextElementSibling;
   if (hint && hint.classList.contains("field-hint")) {
     hint.textContent = isVideo
-      ? "от 10 до 100 символов (ограничение для видео)"
-      : "от 10 до 350 символов";
+        ? "от 10 до 100 символов (ограничение для видео)"
+        : "от 10 до 350 символов";
   }
 }
 
@@ -366,14 +366,15 @@ async function ParseResponseError(response) {
   } catch { }
 
   rawMessage = rawMessage
-    .replace(/^(ошибка\s*сервера|ошибка|bad\s*request|error)\s*[:\-]?\s*(\d{3})?\s*[:\-]?\s*/i, "")
-    .trim();
+      .replace(/^(ошибка\s*сервера|ошибка|bad\s*request|error)\s*[:\-]?\s*(\d{3})?\s*[:\-]?\s*/i, "")
+      .trim();
 
   if (rawMessage) {
     return rawMessage.charAt(0).toUpperCase() + rawMessage.slice(1);
   }
 
   if (response.status === 400) return "Некорректные параметры запроса";
+  if (response.status === 429) return "Очередь переполнена повторите попытку позже";
   if (response.status === 413) return "Файл слишком большой";
   if (response.status >= 500) return "Произошла ошибка при обработке на сервере";
   return "Не удалось выполнить запрос";

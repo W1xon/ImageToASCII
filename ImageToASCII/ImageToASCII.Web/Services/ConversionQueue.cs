@@ -6,18 +6,34 @@ namespace ImageToASCII.Web;
 
 public class ConversionQueue
 {
-    public readonly Channel<ConversionJob> ConversionChannel = Channel.CreateUnbounded<ConversionJob>(new UnboundedChannelOptions
-    {
-        SingleReader = false  
-    });
+    public Channel<ConversionJob> ConversionChannel { get; }
 
     private readonly ConcurrentDictionary<Guid, ConversionJob> _jobs = new();
-    public async Task EnqueueWorkAsync(ConversionJob job)
+    
+    public ConversionQueue(int capacity = 100)
     {
-        _jobs[job.Id] = job;
-         await ConversionChannel.Writer.WriteAsync(job);
+        var options = new BoundedChannelOptions(capacity)
+        {
+            FullMode = BoundedChannelFullMode.Wait, 
+            SingleReader = false 
+        };
+
+        ConversionChannel = Channel.CreateBounded<ConversionJob>(options);
     }
 
+
+    
+    public bool TryEnqueueWork(ConversionJob job)
+    {
+        if (ConversionChannel.Writer.TryWrite(job))
+        {
+            _jobs[job.Id] = job;
+            return true;
+        }
+
+        return false;
+    }
+    
     public ConversionJob? GetJob(Guid id)
     {
         _jobs.TryGetValue(id, out var job);

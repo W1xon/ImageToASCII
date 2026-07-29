@@ -1,6 +1,7 @@
 using ImageToASCII.Web.DTOs;
 using ImageToASCII.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ImageToASCII.Web.Controllers;
 
@@ -45,13 +46,17 @@ public class MediaController : ControllerBase
     
     [RequestSizeLimit(30 * 1024 * 1024)]
     [HttpPost("convert")]
+    [EnableRateLimiting("AsciiConversionPolicy")]
     public async Task<IActionResult> Convert([FromForm] ConvertMediaRequest media)
     {
         var (isValid, jobKind, errorReason) = await _validator.ValidateAsync(media);
         if (!isValid) 
             return BadRequest(errorReason);
 
-        Guid jobId = await _convertMediaService.EnqueueJobAsync(media, jobKind);
-        return Ok(new { jobId });
+        Guid? jobId = await _convertMediaService.EnqueueJobAsync(media, jobKind);
+        if (jobId.HasValue)
+            return Accepted(new { jobId });
+        else
+            return StatusCode(StatusCodes.Status429TooManyRequests, "Очередь заполнена");
     }
 }

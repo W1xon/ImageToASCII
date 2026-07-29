@@ -16,7 +16,7 @@ public class ConvertMediaService
         _queue = queue;
     }
 
-    public async Task<Guid> EnqueueJobAsync(ConvertMediaRequest media, JobType type)
+    public async Task<Guid?> EnqueueJobAsync(ConvertMediaRequest media, JobType type)
     {
         string filePath = await _fileService.Save(media.File);
         int paletteIndex = AsciiPaletteRegistry.All.Count < media.PaletteIndex 
@@ -47,9 +47,9 @@ public class ConvertMediaService
             Status = JobStatus.Pending
         };
         
-        await _queue.EnqueueWorkAsync(job);
-        
-        return job.Id;
+        if(_queue.TryEnqueueWork(job))
+            return job.Id;
+        return null;
     }
 
     public JobStatus GetStatus(Guid jobId)

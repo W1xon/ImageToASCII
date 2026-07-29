@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using ImageToASCII.Core;
 using ImageToASCII.Services;
 using ImageToASCII.Web.Files;
@@ -10,6 +11,25 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        builder.Services.AddRateLimiter( options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            options.AddPolicy("AsciiConversionPolicy", httpContext =>
+            {
+                string ipAddress = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknow";
+                
+                return RateLimitPartition.GetSlidingWindowLimiter(
+                    partitionKey: ipAddress,
+                    factory : _ => new SlidingWindowRateLimiterOptions()
+                    {
+                        PermitLimit = 30,
+                        Window = TimeSpan.FromMinutes(1),
+                        SegmentsPerWindow = 3,
+                        QueueLimit = 0,
+                        AutoReplenishment = true
+                    });
+            });
+        });
         
         builder.Services.AddSingleton<ConversionQueue>();
         builder.Services.AddSingleton<IReporter, WebReporter>();
@@ -29,6 +49,9 @@ public class Program
         builder.Services.AddControllers();
 
         var app = builder.Build();
+        app.UseRouting();
+        app.UseRateLimiter();
+        
         app.UseDefaultFiles();
         app.UseStaticFiles();
         

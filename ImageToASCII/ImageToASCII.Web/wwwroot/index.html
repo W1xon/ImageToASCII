@@ -6,92 +6,369 @@
   <title>ImageToASCII — Конвертер медиа в ASCII-арт</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="/css/style.css">
+  <base target="_blank">
 </head>
 <body>
-  <div class="bg-canvas" id="asciiContainer"></div>
+<div class="bg-canvas" id="asciiContainer"></div>
+<div class="film-grain"></div>
 
-  <div class="page">
-    <div class="card">
-      <div class="home-grid">
-        <div class="home-content">
-          <h1>Конвертер картинок в ASCII-арт</h1>
-          <p class="subtitle">
-            Загрузи изображение или видео, выбери палитру символов — сервис вернёт результат в виде ASCII-графики.
-          </p>
-
-          <ul class="feature-list">
-            <li>
-              <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-              <span>Поддержка изображений и видео: JPG, PNG, GIF, BMP, WEBP, MP4, MOV, AVI, WEBM, MKV, FLV, WMV</span>
-            </li>
-            <li>
-              <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 7V4h3M4 17v3h3M20 7V4h-3M20 17v3h-3M9 9h6v6H9z"/>
-              </svg>
-              <span>10 наборов символов — от базового до плотных блоков</span>
-            </li>
-            <li>
-              <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
-                <path d="M2 12h20"/>
-              </svg>
-              <span>4 типа палитры: базовая, 16 цветов, 7 цветов, естественная</span>
-            </li>
-            <li>
-              <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
-                <path d="M3 12v5h16a2 2 0 0 1 0 4H3v-4"/>
-                <line x1="18" y1="9" x2="18.01" y2="9"/>
-                <line x1="18" y1="15" x2="18.01" y2="15"/>
-              </svg>
-              <span>Настраиваемая ширина результата</span>
-            </li>
-          </ul>
-
-          <div class="btn-container">
-            <a class="btn" href="/media/convert">
-              Открыть загрузку
-              <svg class="arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </a>
-          </div>
+<div class="page">
+  <div class="card hero-card">
+    <div class="home-grid">
+      <div class="home-content">
+        <h1>Конвертер картинок в ASCII-арт</h1>
+        <p class="subtitle">
+          Загрузи изображение или видео, выбери палитру символов — сервис вернёт результат в виде ASCII-графики.
+        </p>
+        <ul class="feature-list">
+          <li>
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="M21 15l-5-5L5 21"/>
+            </svg>
+            <span>Поддержка изображений и видео: JPG, PNG, GIF, BMP, WEBP, MP4, MOV, AVI, WEBM, MKV, FLV, WMV</span>
+          </li>
+          <li>
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 7V4h3M4 17v3h3M20 7V4h-3M20 17v3h-3M9 9h6v6H9z"/>
+            </svg>
+            <span>10 наборов символов — от базового до плотных блоков</span>
+          </li>
+          <li>
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/>
+              <path d="M2 12h20"/>
+            </svg>
+            <span>4 типа палитры: базовая, 16 цветов, 7 цветов, естественная</span>
+          </li>
+          <li>
+            <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+              <path d="M3 12v5h16a2 2 0 0 1 0 4H3v-4"/>
+              <line x1="18" y1="9" x2="18.01" y2="9"/>
+              <line x1="18" y1="15" x2="18.01" y2="15"/>
+            </svg>
+            <span>Настраиваемая ширина результата</span>
+          </li>
+        </ul>
+        <div class="btn-container">
+          <a class="btn" href="/media/convert">
+            Перейдти к обработке
+            <svg class="arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
         </div>
-
-        <div class="home-media">
-          <div class="comparison-slider" style="--pos: 50%;">
-            <div class="img-wrapper img-before">
-              <img src="/images/demo-original.jpg" alt="Оригинал">
-              <span class="label">Оригинал</span>
-            </div>
-            <div class="img-wrapper img-after">
-              <img src="/images/demo-ascii.png" alt="ASCII результат">
-              <span class="label">ASCII</span>
-            </div>
-            <div class="slider-line"></div>
-            <input type="range" min="0" max="100" value="50" class="slider-input" aria-label="Сравнение результатов">
+      </div>
+      <div class="home-media">
+        <div class="comparison-slider" style="--pos: 50%;">
+          <div class="img-wrapper img-before">
+            <img src="/images/demo-original.jpg" alt="Оригинал">
+            <span class="label">Оригинал</span>
           </div>
+          <div class="img-wrapper img-after">
+            <img src="/images/demo-ascii.png" alt="ASCII результат">
+            <span class="label">ASCII</span>
+          </div>
+          <div class="slider-line"></div>
+          <input type="range" min="0" max="100" value="50" class="slider-input" aria-label="Сравнение результатов">
         </div>
       </div>
     </div>
-
-    <p class="footnote">wixon / imagetoascii</p>
   </div>
 
-  <script>
-    const slider = document.querySelector('.comparison-slider');
-    const input = document.querySelector('.slider-input');
-    if (slider && input) {
-      input.addEventListener('input', (e) => {
-        slider.style.setProperty('--pos', `${e.target.value}%`);
+  <div class="card examples-section">
+    <div class="section-header">
+      <h2>Примеры работы</h2>
+      <p class="section-subtitle">Один инструмент — разные задачи. От портретов до видео.</p>
+    </div>
+    <div class="examples-grid" id="examplesGrid">
+      <div class="example-card">
+        <div class="ghost-hint" id="ghostHint"></div>
+        <div class="example-images">
+          <div class="example-img-wrap">
+            <img src="/images/example1-original.png" alt="Оригинал фото" loading="lazy">
+            <span class="example-tag">Оригинал</span>
+          </div>
+          <div class="example-img-wrap example-ascii">
+            <img src="/images/example1-ascii.png" alt="ASCII фото" loading="lazy">
+            <span class="example-tag">ASCII</span>
+            <div class="ascii-hint-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+              Наведи, чтобы увеличить
+            </div>
+          </div>
+        </div>
+        <div class="example-meta"><strong>Фотография</strong></div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-images">
+          <div class="example-img-wrap">
+            <img src="/images/example2-original.jpg" alt="Оригинал скриншот" loading="lazy">
+            <span class="example-tag">Оригинал</span>
+          </div>
+          <div class="example-img-wrap example-ascii">
+            <img src="/images/example2-ascii.png" alt="ASCII скриншот" loading="lazy">
+            <span class="example-tag">ASCII</span>
+            <div class="ascii-hint-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+              Наведи, чтобы увеличить
+            </div>
+          </div>
+        </div>
+        <div class="example-meta"><strong>Скриншот</strong></div>
+      </div>
+
+      <div class="example-card">
+        <div class="example-images">
+          <div class="example-img-wrap">
+            <img src="/images/example3-original.jpeg" alt="Оригинал видео" loading="lazy">
+            <span class="example-tag">Кадр</span>
+          </div>
+          <div class="example-img-wrap example-ascii">
+            <img src="/images/example3-ascii.png" alt="ASCII видео" loading="lazy">
+            <span class="example-tag">ASCII</span>
+            <div class="ascii-hint-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+              Наведи, чтобы увеличить
+            </div>
+          </div>
+        </div>
+        <div class="example-meta"><strong>Видео</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card cli-card">
+    <div class="cli-layout">
+      <div class="cli-content">
+        <div class="badge badge-ghost">Для продвинутых пользователей</div>
+        <h2>ImageToASCII CLI</h2>
+        <p>
+          Веб-версия работает с лимитами: файлы до 30 МБ, видео до 20 секунд и очередь на обработку.
+          Если нужно больше — используйте исходную CLI-утилиту. Она работает локально, без жестких ограничений и без интернета.
+        </p>
+        <ul class="cli-features">
+          <li>Нет жестких лимитов на размер и длительность</li>
+          <li>Вся обработка происходит на вашем ПК</li>
+          <li>Открытый исходный код</li>
+        </ul>
+      </div>
+      <div class="cli-actions">
+        <a class="btn btn-ghost btn-cli" href="https://github.com/W1xon/ImageToASCII">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+          </svg>
+          GitHub репозиторий
+        </a>
+        <div class="download-group">
+          <a class="btn btn-download-os" href="https://github.com/W1xon/ImageToASCII/releases/latest">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Скачать для Windows
+          </a>
+          <a class="btn btn-download-os" href="https://github.com/W1xon/ImageToASCII/releases/latest">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Скачать для Linux
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card faq-card">
+    <div class="section-header">
+      <h2>Частые вопросы</h2>
+      <p class="section-subtitle">Как это работает и почему так устроено.</p>
+    </div>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>
+          <span>Как работает конвертация?</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </summary>
+        <div class="faq-answer">
+          Изображение или видео сжимается, затем для каждого пикселя вычисляется средняя яркость, после чего подбирается символ с соответствующей «плотностью» из выбранного набора. Результат — текстовая картинка, составленная из ASCII-символов.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <span>Почему в веб-версии есть лимиты?</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </summary>
+        <div class="faq-answer">
+          Веб-версия — это демонстрация возможностей утилиты, развёрнутая на общедоступном сервере. Обработка видео и больших изображений требует значительных вычислительных ресурсов, поэтому введены разумные ограничения: 30 МБ на файл, 20 секунд на видео и очередь на обработку. Для массовой работы рекомендуется CLI-версия.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <span>Чем CLI-версия отличается от веб-версии?</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </summary>
+        <div class="faq-answer">
+          CLI-версия запускается на вашем компьютере, не требует интернета и не имеет ограничений. Веб-версия удобна для быстрой проверки и разовых задач.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <span>Какие форматы поддерживаются?</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </summary>
+        <div class="faq-answer">
+          Изображения: JPG, JPEG, PNG, GIF, BMP, WEBP. Видео: MP4, MOV, AVI, WEBM, MKV, FLV, WMV. Результат сохраняется в PNG для изображений и MP4 для видео.
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <span>Можно ли использовать результат коммерчески?</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </summary>
+        <div class="faq-answer">
+          Да. Всё, что вы конвертируете через сервис или CLI, принадлежит вам. Проект распространяется под лицензией MIT, вы можете использовать код и результаты без ограничений.
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <strong>ImageToASCII</strong>
+        <span>Конвертер медиа в ASCII-арт</span>
+      </div>
+      <div class="footer-links">
+        <a href="/media/convert">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Конвертировать
+        </a>
+        <a href="https://github.com/W1xon/ImageToASCII">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          GitHub
+        </a>
+        <a href="https://github.com/W1xon/ImageToASCII/releases">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          Релизы
+        </a>
+        <a href="https://t.me/CoderW0rker">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Telegram
+        </a>
+      </div>
+      <div class="footer-author">
+        <span>Сделано <a href="https://github.com/W1xon">Wixon</a></span>
+        <span class="footer-sep">·</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+  const slider = document.querySelector('.comparison-slider');
+  const input = document.querySelector('.slider-input');
+  if (slider && input) {
+    input.addEventListener('input', (e) => {
+      slider.style.setProperty('--pos', `${e.target.value}%`);
+    });
+  }
+</script>
+<script>
+  (function() {
+    const lens = document.createElement('div');
+    lens.className = 'zoom-lens';
+    document.body.appendChild(lens);
+    let activeImg = null;
+
+    document.querySelectorAll('.example-img-wrap').forEach(wrap => {
+      const img = wrap.querySelector('img');
+      if (!img) return;
+      wrap.addEventListener('mouseenter', () => {
+        activeImg = img;
+        lens.style.display = 'block';
+        lens.style.backgroundImage = `url(${img.src})`;
       });
+      wrap.addEventListener('mouseleave', () => {
+        activeImg = null;
+        lens.style.display = 'none';
+      });
+      wrap.addEventListener('mousemove', (e) => {
+        if (!activeImg) return;
+        const rect = activeImg.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+          lens.style.display = 'none'; return;
+        }
+        lens.style.display = 'block';
+        const zoom = 2, lensSize = 150;
+        const ratioX = activeImg.naturalWidth > 0 ? activeImg.naturalWidth / rect.width : 1;
+        const ratioY = activeImg.naturalHeight > 0 ? activeImg.naturalHeight / rect.height : 1;
+        const bgX = -(x * ratioX * zoom - lensSize / 2);
+        const bgY = -(y * ratioY * zoom - lensSize / 2);
+        lens.style.backgroundSize = `${rect.width * ratioX * zoom}px ${rect.height * ratioY * zoom}px`;
+        lens.style.backgroundPosition = `${bgX}px ${bgY}px`;
+        const offset = 20;
+        let left = e.clientX + offset, top = e.clientY + offset;
+        if (left + lensSize > window.innerWidth) left = e.clientX - lensSize - offset;
+        if (top + lensSize > window.innerHeight) top = e.clientY - lensSize - offset;
+        lens.style.left = `${left}px`;
+        lens.style.top = `${top}px`;
+      });
+    });
+  })();
+</script>
+<script>
+  (function() {
+    const grid = document.getElementById('examplesGrid');
+    if (!grid) return;
+
+    const ghost = document.getElementById('ghostHint');
+    if (ghost && !localStorage.getItem('seenGhost')) {
+      setTimeout(() => {
+        ghost.style.display = 'block';
+        const hide = () => {
+          ghost.style.display = 'none';
+          localStorage.setItem('seenGhost', '1');
+          grid.removeEventListener('mouseenter', hide);
+        };
+        grid.addEventListener('mouseenter', hide);
+      }, 1200);
     }
-  </script>
-  <script src="/js/ascii-bg.js"></script>
+  })();
+</script>
+<script>
+  (function() {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.example-card').forEach(el => revealObserver.observe(el));
+  })();
+</script>
+<script src="/js/ascii-bg.js"></script>
 </body>
 </html>
