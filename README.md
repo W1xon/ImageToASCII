@@ -96,8 +96,8 @@ CLI — без лимитов, работает локально, полный �
 
 ## 🎞️ Видео → ASCII
 
-<div align="center">
 https://github.com/user-attachments/assets/1c3e343e-de24-4901-a424-ade4c771e003
+<div align="center">
 <p><sub>
 Каждый кадр обработан, звук склеен с оригиналом — теперь еще быстрее.
 </sub></p>
