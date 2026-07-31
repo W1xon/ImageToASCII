@@ -88,8 +88,8 @@ CLI — без лимитов, работает локально, полный �
 ### 🌐 Веб-версия
 
 <div align="center">
-  <img src="Assets/Web_Compare.png" width="45%" alt="Основная страница">
-  <img src="Assets/Web_Upload.png" width="45%" alt="Страница загрузки">
+  <img src="Assets/Web_Compare.png" width="70%" alt="Основная страница">
+  <img src="Assets/Web_Upload.png" width="70%" alt="Страница загрузки">
 </div>
 
 ---
@@ -97,9 +97,7 @@ CLI — без лимитов, работает локально, полный �
 ## 🎞️ Видео → ASCII
 
 <div align="center">
-
 https://github.com/user-attachments/assets/1c3e343e-de24-4901-a424-ade4c771e003
-
 <p><sub>
 Каждый кадр обработан, звук склеен с оригиналом — теперь еще быстрее.
 </sub></p>
