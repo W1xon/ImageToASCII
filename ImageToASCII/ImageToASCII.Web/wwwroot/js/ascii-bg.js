@@ -66,16 +66,14 @@
       const duration = (4 + speedFactor * 30) * 1000;
       const delay = Math.random() * -40000;
       const fontSize = Math.floor(10 + depth * 28);
-      const minOpacity = 0.06 + depth * 0.06;
-      const maxOpacity = 0.3 + depth * 0.5;
+      const maxOpacity = 0.25 + depth * 0.55;
       const easing = easings[Math.floor(Math.random() * easings.length)];
 
       span.style.fontSize = `${fontSize}px`;
       span.style.color = color;
-      span.style.opacity = minOpacity;
 
       if (depth > 0.5) {
-        const glowRadius = Math.floor((depth - 0.5) * 18);
+        const glowRadius = Math.floor((depth - 0.5) * 12);
         span.style.textShadow = `0 0 ${glowRadius}px ${color}, 0 0 ${glowRadius * 2}px ${color}`;
       }
 
@@ -83,21 +81,28 @@
         span.style.filter = `blur(${(0.25 - depth) * 1.2}px)`;
       }
 
+      // Анимация движения — плавный дрейф
       span.animate([
-        {
-          transform: `translate3d(${startX}vw, ${startY}vh, 0)`,
-          opacity: minOpacity
-        },
-        { opacity: maxOpacity, offset: 0.5 },
-        {
-          transform: `translate3d(${endX}vw, ${endY}vh, 0)`,
-          opacity: minOpacity
-        }
+        { transform: `translate3d(${startX}vw, ${startY}vh, 0)` },
+        { transform: `translate3d(${endX}vw, ${endY}vh, 0)` }
       ], {
         duration: duration,
         delay: delay,
         iterations: Infinity,
         easing: easing
+      });
+
+      // Анимация прозрачности — плавное появление и растворение
+      span.animate([
+        { opacity: 0 },
+        { opacity: maxOpacity, offset: 0.2 },
+        { opacity: maxOpacity, offset: 0.8 },
+        { opacity: 0 }
+      ], {
+        duration: duration,
+        delay: delay,
+        iterations: Infinity,
+        easing: 'ease-in-out'
       });
 
       container.appendChild(span);
