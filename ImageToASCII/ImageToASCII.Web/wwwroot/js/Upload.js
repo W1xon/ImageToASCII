@@ -23,6 +23,16 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// При закрытии/перезагрузке вкладки во время обработки — чистим задачу
+window.addEventListener("beforeunload", (e) => {
+  if (localStorage.getItem("activeJobId")) {
+    localStorage.removeItem("activeJobId");
+    e.preventDefault();
+    e.returnValue = "Обработка ещё идёт. Если вы закроете вкладку, прогресс будет потерян.";
+    return e.returnValue;
+  }
+});
+
 InitEvents();
 
 function InitEvents() {
@@ -294,6 +304,14 @@ function RenderResult(url, isVideo, fileName) {
   downloadBtn.href = url;
   downloadBtn.download = fileName;
   downloadContainer.style.display = "block";
+
+  // Автоскролл к результату на мобильных
+  if (window.innerWidth < 768) {
+    setTimeout(() => {
+      const el = document.getElementById('imageContainer');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
+  }
 }
 
 function SetStatus(type, message) {
