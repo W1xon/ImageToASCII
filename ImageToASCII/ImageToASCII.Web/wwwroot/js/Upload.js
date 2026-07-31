@@ -23,7 +23,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// При закрытии/перезагрузке вкладки во время обработки — чистим задачу
+
 window.addEventListener("beforeunload", (e) => {
   if (localStorage.getItem("activeJobId")) {
     localStorage.removeItem("activeJobId");
@@ -305,7 +305,7 @@ function RenderResult(url, isVideo, fileName) {
   downloadBtn.download = fileName;
   downloadContainer.style.display = "block";
 
-  // Автоскролл к результату на мобильных
+
   if (window.innerWidth < 768) {
     setTimeout(() => {
       const el = document.getElementById('imageContainer');
