@@ -97,7 +97,7 @@ CLI — без лимитов, работает локально, полный �
 ## 🎞️ Видео → ASCII
 
 <div align="center">
-<video src="Assets/Video_ASCII.webm" width="50%" controls></video>
+<video src="https://github.com/W1xon/ImageToASCII/blob/main/Assets/Video_ASCII.webm" width="50%" controls></video>
 <p><sub>
 Каждый кадр обработан, звук склеен с оригиналом — теперь еще быстрее.
 </sub></p>
