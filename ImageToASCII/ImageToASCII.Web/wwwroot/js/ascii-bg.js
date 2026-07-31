@@ -18,6 +18,12 @@
     const container = document.getElementById('asciiContainer');
     if (!container) return;
 
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      container.innerHTML = '';
+      return;
+    }
+
     container.innerHTML = '';
 
     const chars = [

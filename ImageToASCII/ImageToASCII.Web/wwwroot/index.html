@@ -4,9 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ImageToASCII — Конвертер медиа в ASCII-арт</title>
-  <link rel="icon" href="data:,">
+  <meta name="description" content="Бесплатный онлайн-конвертер изображений и видео в ASCII-арт. Поддержка JPG, PNG, GIF, MP4, MOV и других форматов.">
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90' font-family='monospace' fill='%23d85a30'%3E%40%3C/text%3E%3C/svg%3E">
+
+  <meta property="og:title" content="ImageToASCII — Конвертер медиа в ASCII-арт">
+  <meta property="og:description" content="Загрузи изображение или видео и получи результат в виде ASCII-графики. Файлы до 30 МБ, видео до 20 сек.">
+  <meta property="og:image" content="/images/og-cover.png">
+  <meta property="og:url" content="https://your-domain.com/">
+  <meta property="og:type" content="website">
+
   <link rel="stylesheet" href="/css/style.css">
-  <base target="_blank">
 </head>
 <body>
 <div class="bg-canvas" id="asciiContainer"></div>
@@ -55,7 +63,7 @@
         </ul>
         <div class="btn-container">
           <a class="btn" href="/media/convert">
-            Перейдти к обработке
+            Перейти к обработке
             <svg class="arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
@@ -149,23 +157,23 @@
         <h2>ImageToASCII CLI</h2>
         <p>
           Веб-версия работает с лимитами: файлы до 30 МБ, видео до 20 секунд и очередь на обработку.
-          Если нужно больше — используйте исходную CLI-утилиту. Она работает локально, без жестких ограничений и без интернета.
+          Если нужно больше — используйте исходную CLI-утилиту. Она работает локально, без жёстких ограничений и без интернета.
         </p>
         <ul class="cli-features">
-          <li>Нет жестких лимитов на размер и длительность</li>
+          <li>Нет жёстких лимитов на размер и длительность</li>
           <li>Вся обработка происходит на вашем ПК</li>
           <li>Открытый исходный код</li>
         </ul>
       </div>
       <div class="cli-actions">
-        <a class="btn btn-ghost btn-cli" href="https://github.com/W1xon/ImageToASCII">
+        <a class="btn btn-ghost btn-cli" href="https://github.com/W1xon/ImageToASCII" target="_blank" rel="noopener noreferrer">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
           </svg>
           GitHub репозиторий
         </a>
         <div class="download-group">
-          <a class="btn btn-download-os" href="https://github.com/W1xon/ImageToASCII/releases/latest">
+          <a class="btn btn-download-os" href="https://github.com/W1xon/ImageToASCII/releases/latest" target="_blank" rel="noopener noreferrer">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
@@ -173,7 +181,7 @@
             </svg>
             Скачать для Windows
           </a>
-          <a class="btn btn-download-os" href="https://github.com/W1xon/ImageToASCII/releases/latest">
+          <a class="btn btn-download-os" href="https://github.com/W1xon/ImageToASCII/releases/latest" target="_blank" rel="noopener noreferrer">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
@@ -191,62 +199,72 @@
       <h2>Частые вопросы</h2>
       <p class="section-subtitle">Как это работает и почему так устроено.</p>
     </div>
-    <div class="faq-list">
-      <details class="faq-item">
-        <summary>
-          <span>Как работает конвертация?</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </summary>
-        <div class="faq-answer">
-          Изображение или видео сжимается, затем для каждого пикселя вычисляется средняя яркость, после чего подбирается символ с соответствующей «плотностью» из выбранного набора. Результат — текстовая картинка, составленная из ASCII-символов.
+    <div class="faq-grid" id="faqGrid">
+      <div class="flip-card" tabindex="0" role="button" aria-expanded="false">
+        <div class="flip-card-inner">
+          <div class="flip-card-front">
+            <span class="flip-card-question">Как работает конвертация?</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+            </svg>
+          </div>
+          <div class="flip-card-back">
+            <p>Изображение или видео сжимается, затем для каждого пикселя вычисляется средняя яркость, после чего подбирается символ с соответствующей «плотностью» из выбранного набора. Результат — текстовая картинка, составленная из ASCII-символов.</p>
+          </div>
         </div>
-      </details>
-      <details class="faq-item">
-        <summary>
-          <span>Почему в веб-версии есть лимиты?</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </summary>
-        <div class="faq-answer">
-          Веб-версия — это демонстрация возможностей утилиты, развёрнутая на общедоступном сервере. Обработка видео и больших изображений требует значительных вычислительных ресурсов, поэтому введены разумные ограничения: 30 МБ на файл, 20 секунд на видео и очередь на обработку. Для массовой работы рекомендуется CLI-версия.
+      </div>
+      <div class="flip-card" tabindex="0" role="button" aria-expanded="false">
+        <div class="flip-card-inner">
+          <div class="flip-card-front">
+            <span class="flip-card-question">Почему в веб-версии есть лимиты?</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+            </svg>
+          </div>
+          <div class="flip-card-back">
+            <p>Веб-версия — это демонстрация возможностей утилиты, развёрнутая на общедоступном сервере. Обработка видео и больших изображений требует значительных вычислительных ресурсов, поэтому введены разумные ограничения: 30 МБ на файл, 20 секунд на видео и очередь на обработку. Для массовой работы рекомендуется CLI-версия.</p>
+          </div>
         </div>
-      </details>
-      <details class="faq-item">
-        <summary>
-          <span>Чем CLI-версия отличается от веб-версии?</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </summary>
-        <div class="faq-answer">
-          CLI-версия запускается на вашем компьютере, не требует интернета и не имеет ограничений. Веб-версия удобна для быстрой проверки и разовых задач.
+      </div>
+      <div class="flip-card" tabindex="0" role="button" aria-expanded="false">
+        <div class="flip-card-inner">
+          <div class="flip-card-front">
+            <span class="flip-card-question">Чем CLI-версия отличается от веб-версии?</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+            </svg>
+          </div>
+          <div class="flip-card-back">
+            <p>CLI-версия запускается на вашем компьютере, не требует интернета и не имеет ограничений. Веб-версия удобна для быстрой проверки и разовых задач.</p>
+          </div>
         </div>
-      </details>
-      <details class="faq-item">
-        <summary>
-          <span>Какие форматы поддерживаются?</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </summary>
-        <div class="faq-answer">
-          Изображения: JPG, JPEG, PNG, GIF, BMP, WEBP. Видео: MP4, MOV, AVI, WEBM, MKV, FLV, WMV. Результат сохраняется в PNG для изображений и MP4 для видео.
+      </div>
+      <div class="flip-card" tabindex="0" role="button" aria-expanded="false">
+        <div class="flip-card-inner">
+          <div class="flip-card-front">
+            <span class="flip-card-question">Какие форматы поддерживаются?</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+            </svg>
+          </div>
+          <div class="flip-card-back">
+            <p>Изображения: JPG, JPEG, PNG, GIF, BMP, WEBP. Видео: MP4, MOV, AVI, WEBM, MKV, FLV, WMV. Результат сохраняется в PNG для изображений и MP4 для видео.</p>
+          </div>
         </div>
-      </details>
-      <details class="faq-item">
-        <summary>
-          <span>Можно ли использовать результат коммерчески?</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </summary>
-        <div class="faq-answer">
-          Да. Всё, что вы конвертируете через сервис или CLI, принадлежит вам. Проект распространяется под лицензией MIT, вы можете использовать код и результаты без ограничений.
+      </div>
+      <div class="flip-card" tabindex="0" role="button" aria-expanded="false">
+        <div class="flip-card-inner">
+          <div class="flip-card-front">
+            <span class="flip-card-question">Можно ли использовать результат коммерчески?</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/>
+            </svg>
+          </div>
+          <div class="flip-card-back">
+            <p>Да. Всё, что вы конвертируете через сервис или CLI, принадлежит вам. Проект распространяется под лицензией MIT, вы можете использовать код и результаты без ограничений.</p>
+          </div>
         </div>
-      </details>
+      </div>
     </div>
   </div>
 
@@ -261,25 +279,33 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Конвертировать
         </a>
-        <a href="https://github.com/W1xon/ImageToASCII">
+        <a href="https://github.com/W1xon/ImageToASCII" target="_blank" rel="noopener noreferrer">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
           GitHub
         </a>
-        <a href="https://github.com/W1xon/ImageToASCII/releases">
+        <a href="https://github.com/W1xon/ImageToASCII/releases" target="_blank" rel="noopener noreferrer">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
           Релизы
         </a>
-        <a href="https://t.me/CoderW0rker">
+        <a href="https://t.me/CoderW0rker" target="_blank" rel="noopener noreferrer">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           Telegram
         </a>
       </div>
       <div class="footer-author">
-        <span>Сделано <a href="https://github.com/W1xon">Wixon</a></span>
+        <span>Сделано <a href="https://github.com/W1xon" target="_blank" rel="noopener noreferrer">Wixon</a></span>
         <span class="footer-sep">·</span>
       </div>
     </div>
   </footer>
+</div>
+
+<div id="imageModal" class="image-modal">
+  <div class="image-modal-backdrop"></div>
+  <div class="image-modal-content">
+    <button class="image-modal-close" aria-label="Закрыть">×</button>
+    <img id="modalImage" src="" alt="Увеличенное изображение">
+  </div>
 </div>
 
 <script>
@@ -293,46 +319,78 @@
 </script>
 <script>
   (function() {
-    const lens = document.createElement('div');
-    lens.className = 'zoom-lens';
-    document.body.appendChild(lens);
-    let activeImg = null;
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    if (!isTouch) {
+      const lens = document.createElement('div');
+      lens.className = 'zoom-lens';
+      document.body.appendChild(lens);
+      let activeImg = null;
+
+      document.querySelectorAll('.example-img-wrap').forEach(wrap => {
+        const img = wrap.querySelector('img');
+        if (!img) return;
+        wrap.addEventListener('mouseenter', () => {
+          activeImg = img;
+          lens.style.display = 'block';
+          lens.style.backgroundImage = `url(${img.src})`;
+        });
+        wrap.addEventListener('mouseleave', () => {
+          activeImg = null;
+          lens.style.display = 'none';
+        });
+        wrap.addEventListener('mousemove', (e) => {
+          if (!activeImg) return;
+          const rect = activeImg.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+            lens.style.display = 'none'; return;
+          }
+          lens.style.display = 'block';
+          const zoom = 2, lensSize = 150;
+          const ratioX = activeImg.naturalWidth > 0 ? activeImg.naturalWidth / rect.width : 1;
+          const ratioY = activeImg.naturalHeight > 0 ? activeImg.naturalHeight / rect.height : 1;
+          const bgX = -(x * ratioX * zoom - lensSize / 2);
+          const bgY = -(y * ratioY * zoom - lensSize / 2);
+          lens.style.backgroundSize = `${rect.width * ratioX * zoom}px ${rect.height * ratioY * zoom}px`;
+          lens.style.backgroundPosition = `${bgX}px ${bgY}px`;
+          const offset = 20;
+          let left = e.clientX + offset, top = e.clientY + offset;
+          if (left + lensSize > window.innerWidth) left = e.clientX - lensSize - offset;
+          if (top + lensSize > window.innerHeight) top = e.clientY - lensSize - offset;
+          lens.style.left = `${left}px`;
+          lens.style.top = `${top}px`;
+        });
+      });
+      return;
+    }
+
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    const modalClose = modal.querySelector('.image-modal-close');
+    const backdrop = modal.querySelector('.image-modal-backdrop');
+
+    const closeModal = () => {
+      modal.classList.remove('is-open');
+      document.body.style.overflow = '';
+      modalImg.src = '';
+    };
 
     document.querySelectorAll('.example-img-wrap').forEach(wrap => {
-      const img = wrap.querySelector('img');
-      if (!img) return;
-      wrap.addEventListener('mouseenter', () => {
-        activeImg = img;
-        lens.style.display = 'block';
-        lens.style.backgroundImage = `url(${img.src})`;
+      wrap.addEventListener('click', () => {
+        const img = wrap.querySelector('img');
+        if (!img || !img.src) return;
+        modalImg.src = img.src;
+        modal.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
       });
-      wrap.addEventListener('mouseleave', () => {
-        activeImg = null;
-        lens.style.display = 'none';
-      });
-      wrap.addEventListener('mousemove', (e) => {
-        if (!activeImg) return;
-        const rect = activeImg.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
-          lens.style.display = 'none'; return;
-        }
-        lens.style.display = 'block';
-        const zoom = 2, lensSize = 150;
-        const ratioX = activeImg.naturalWidth > 0 ? activeImg.naturalWidth / rect.width : 1;
-        const ratioY = activeImg.naturalHeight > 0 ? activeImg.naturalHeight / rect.height : 1;
-        const bgX = -(x * ratioX * zoom - lensSize / 2);
-        const bgY = -(y * ratioY * zoom - lensSize / 2);
-        lens.style.backgroundSize = `${rect.width * ratioX * zoom}px ${rect.height * ratioY * zoom}px`;
-        lens.style.backgroundPosition = `${bgX}px ${bgY}px`;
-        const offset = 20;
-        let left = e.clientX + offset, top = e.clientY + offset;
-        if (left + lensSize > window.innerWidth) left = e.clientX - lensSize - offset;
-        if (top + lensSize > window.innerHeight) top = e.clientY - lensSize - offset;
-        lens.style.left = `${left}px`;
-        lens.style.top = `${top}px`;
-      });
+    });
+
+    modalClose.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
     });
   })();
 </script>
@@ -367,6 +425,23 @@
     }, { threshold: 0.15 });
 
     document.querySelectorAll('.example-card').forEach(el => revealObserver.observe(el));
+  })();
+</script>
+<script>
+  (function() {
+    document.querySelectorAll('.flip-card').forEach(card => {
+      const toggle = () => {
+        const isFlipped = card.classList.toggle('is-flipped');
+        card.setAttribute('aria-expanded', isFlipped ? 'true' : 'false');
+      };
+      card.addEventListener('click', toggle);
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle();
+        }
+      });
+    });
   })();
 </script>
 <script src="/js/ascii-bg.js"></script>

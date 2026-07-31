@@ -59,7 +59,16 @@ function InitDragAndDrop() {
   });
 }
 
+function ClearInputError(input) {
+  if (input) input.classList.remove('input-error');
+}
+
+function SetInputError(input) {
+  if (input) input.classList.add('input-error');
+}
+
 async function OnFileInputChange() {
+  ClearInputError(fileInput);
   ClearSourcePreview();
 
   if (this.files.length > 0) {
@@ -68,6 +77,7 @@ async function OnFileInputChange() {
 
     if (file.size > maxBytes) {
       SetStatus("err", `Файл слишком большой (${(file.size / (1024 * 1024)).toFixed(1)} МБ). Лимит — 30 МБ.`);
+      SetInputError(fileInput);
       ResetFileInputUI();
       ResetResultState();
       return;
@@ -79,7 +89,8 @@ async function OnFileInputChange() {
     if (isVideo) {
       const duration = await GetVideoDurationClient(file);
       if (duration && duration > 20) {
-        SetStatus("err", `Видео слишком длинное (${Math.round(duration)} сек). Лимит — 60 сек.`);
+        SetStatus("err", `Видео слишком длинное (${Math.round(duration)} сек). Лимит — 20 сек.`);
+        SetInputError(fileInput);
         ResetFileInputUI();
         ResetResultState();
         return;
@@ -104,8 +115,11 @@ async function OnFormSubmit(e) {
     e.stopPropagation();
   }
 
+  [fileInput, widthInput].forEach(ClearInputError);
+
   if (!fileInput || !fileInput.files.length) {
     SetStatus("err", "Выберите файл для загрузки");
+    SetInputError(fileInput);
     return;
   }
 
@@ -116,6 +130,13 @@ async function OnFormSubmit(e) {
 
   if (currentWidth > maxWidth) {
     SetStatus("err", `Максимальная ширина для ${isVideo ? "видео" : "изображения"} — ${maxWidth}`);
+    SetInputError(widthInput);
+    return;
+  }
+
+  if (isNaN(currentWidth) || currentWidth < 10) {
+    SetStatus("err", "Ширина должна быть не менее 10 символов");
+    SetInputError(widthInput);
     return;
   }
 
@@ -157,6 +178,13 @@ async function PollJobStatus(jobId) {
       const response = await fetch(`/media/status/${jobId}?_=${Date.now()}`, {
         cache: "no-store"
       });
+
+      if (response.status === 404) {
+        localStorage.removeItem("activeJobId");
+        SetStatus("err", "Задача устарела или не найдена. Пожалуйста, загрузите файл снова.");
+        SetSubmitDisabled(false);
+        return;
+      }
 
       if (!response.ok) {
         SetStatus("err", "Не удалось получить статус задачи");
@@ -205,6 +233,13 @@ async function FetchResult(jobId) {
   try {
     const resultUrl = `/media/result/${jobId}`;
     const response = await fetch(resultUrl, { method: "HEAD" });
+
+    if (response.status === 404) {
+      localStorage.removeItem("activeJobId");
+      SetStatus("err", "Задача устарела или не найдена. Пожалуйста, загрузите файл снова.");
+      SetSubmitDisabled(false);
+      return;
+    }
 
     if (!response.ok) {
       SetStatus("err", "Ошибка при скачивании результата");
@@ -374,7 +409,8 @@ async function ParseResponseError(response) {
   }
 
   if (response.status === 400) return "Некорректные параметры запроса";
-  if (response.status === 429) return "Очередь переполнена повторите попытку позже";
+  if (response.status === 404) return "Задача устарела или не найдена. Пожалуйста, загрузите файл снова.";
+  if (response.status === 429) return "Очередь переполнена, повторите попытку позже";
   if (response.status === 413) return "Файл слишком большой";
   if (response.status >= 500) return "Произошла ошибка при обработке на сервере";
   return "Не удалось выполнить запрос";
